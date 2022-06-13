@@ -4,14 +4,21 @@ public class Program
 {
     public static void Main(string[] args)
     {
-        //var builder = WebApplication.CreateBuilder(args);
-        //var app = builder.Build();
+        IConfiguration configuration = new ConfigurationBuilder().AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+            .AddEnvironmentVariables()
+            .AddCommandLine(args)
+            .Build();
 
-        //app.MapGet("/", () => "Hello World!");
+        var services = new ServiceCollection();
+        ConfigureServices(services, configuration);
 
-        //app.Run();
-
+        Console.ForegroundColor = ConsoleColor.Cyan;
         Console.WriteLine("Hello world!");
+
+    }
+
+    private static void ConfigureServices(IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddSingleton(configuration);
     }
 }
-
