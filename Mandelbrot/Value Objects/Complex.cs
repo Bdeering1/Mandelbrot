@@ -22,5 +22,5 @@
         {
             return new Complex(a.r * b.r - a.i * b.i, a.r * b.i + a.i * b.r);
         }
-   
+    }
 }
