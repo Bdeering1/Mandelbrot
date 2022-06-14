@@ -2,14 +2,14 @@
 {
     public struct Complex
     {
+        public decimal r;
+        public decimal i;
+
         public Complex(decimal real, decimal imaginary)
         {
             r = real;
             i = imaginary;
         }
-
-        public decimal r;
-        public decimal i;
 
         public static Complex operator +(Complex a, Complex b)
         {

@@ -1,4 +1,8 @@
-﻿namespace Mandelbrot;
+﻿using System;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+
+namespace Mandelbrot;
 
 public class Program
 {
