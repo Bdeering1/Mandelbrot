@@ -21,6 +21,8 @@
             new BigComplex(a.r * b.r - a.i * b.i,
                         a.r * b.i + a.i * b.r);
 
-        public override string ToString() => $"{r} + {i}i";
+        public override string ToString() => $"{r.Truncate()} + {i.Truncate()}i";
+
+        public string ToLongString() => $"{r} + {i}i";
     }
 }
