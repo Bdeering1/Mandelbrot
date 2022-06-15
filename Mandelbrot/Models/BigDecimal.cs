@@ -4,15 +4,21 @@ using System.Numerics;
 
 namespace Mandelbrot.Models
 {
+    /// <summary>
+    /// Arbitrary precision decimal
+    /// Based on https://gist.github.com/JcBernack/0b4eef59ca97ee931a2f45542b9ff06d
+    /// </summary>
     public struct BigDecimal
     {
-        public BigInteger significand;
-        public int exponent;
+        public static int Precision { get; set; } = 50;
+
+        public BigInteger Significand { get; set; }
+        public int Exponent { get; set; }
 
         public BigDecimal(BigInteger significand, int exponent)
         {
-            this.significand = significand;
-            this.exponent = exponent;
+            Significand = significand;
+            Exponent = exponent;
         }
 
         /// <summary>
@@ -20,7 +26,22 @@ namespace Mandelbrot.Models
         /// </summary>
         public void Normalize()
         {
-            throw new NotImplementedException();
+            if (Exponent == 0) return;
+            if (Significand == 0)
+            {
+                Exponent = 0;
+                return;
+            }
+            BigInteger remainder = 0;
+            while (remainder == 0)
+            {
+                var shortened = BigInteger.DivRem(Significand, 10, out remainder);
+                if (remainder == 0)
+                {
+                    Significand = shortened;
+                    Exponent++;
+                }
+            }
         }
 
         /// <summary>
@@ -34,7 +55,7 @@ namespace Mandelbrot.Models
 
         public static BigDecimal operator -(BigDecimal a)
         {
-            a.significand *= -1;
+            a.Significand *= -1;
             return a;
         }
 
@@ -50,7 +71,7 @@ namespace Mandelbrot.Models
 
         public static BigDecimal operator *(BigDecimal a, BigDecimal b)
         {
-            return new BigDecimal(a.significand * b.significand, a.exponent * b.exponent);
+            return new BigDecimal(a.Significand * b.Significand, a.Exponent * b.Exponent);
         }
 
         public static BigDecimal operator /(BigDecimal a, BigDecimal b)
@@ -66,34 +87,31 @@ namespace Mandelbrot.Models
 
         public static bool operator ==(BigDecimal a, BigDecimal b)
         {
-            return a.exponent == b.exponent && a.significand == b.significand;
+            return a.Exponent == b.Exponent && a.Significand == b.Significand;
         }
 
         public static bool operator !=(BigDecimal a, BigDecimal b)
         {
-            return a.exponent != b.exponent || a.significand != b.significand;
+            return a.Exponent != b.Exponent || a.Significand != b.Significand;
         }
 
 
         private static BigDecimal Add(BigDecimal a, BigDecimal b)
         {
-            return a.exponent > b.exponent
-                ? new BigDecimal(Align(a, b), b.exponent)
-                : new BigDecimal(Align(b, a), a.exponent);
+            return a.Exponent > b.Exponent
+                ? new BigDecimal(Align(a, b), b.Exponent)
+                : new BigDecimal(Align(b, a), a.Exponent);
         }
 
         private static BigInteger Align(BigDecimal num, BigDecimal reference)
         {
-            return num.significand * BigInteger.Pow(10, num.exponent - reference.exponent);
+            return num.Significand * BigInteger.Pow(10, num.Exponent - reference.Exponent);
         }
 
 
         public override bool Equals([NotNullWhen(true)] object? obj)
         {
-            return obj is not null
-                && obj is BigDecimal dec
-                && dec.exponent == exponent
-                && dec.significand == significand;
+            return obj is not null && obj is BigDecimal dec && dec == this;
         }
 
         public override int GetHashCode()
@@ -101,6 +119,6 @@ namespace Mandelbrot.Models
             throw new NotImplementedException();
         }
 
-        public override string ToString() => $"{significand}e{exponent}";
+        public override string ToString() => $"{Significand}e{Exponent}";
     }
 }
