@@ -105,6 +105,26 @@ namespace Mandelbrot.Models
             return a.Exponent != b.Exponent || a.Significand != b.Significand;
         }
 
+        public static bool operator <(BigDecimal a, BigDecimal b)
+        {
+            return a.Exponent > b.Exponent ? Align(a, b) < b.Significand : a.Significand < Align(b, a);
+        }
+
+        public static bool operator >(BigDecimal a, BigDecimal b)
+        {
+            return a.Exponent > b.Exponent ? Align(a, b) > b.Significand : a.Significand > Align(b, a);
+        }
+
+        public static bool operator <=(BigDecimal a, BigDecimal b)
+        {
+            return a.Exponent > b.Exponent ? Align(a, b) <= b.Significand : a.Significand <= Align(b, a);
+        }
+
+        public static bool operator >=(BigDecimal a, BigDecimal b)
+        {
+            return a.Exponent > b.Exponent ? Align(a, b) >= b.Significand : a.Significand >= Align(b, a);
+        }
+
 
         private static BigDecimal Add(BigDecimal a, BigDecimal b)
         {
