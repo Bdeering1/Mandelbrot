@@ -23,6 +23,19 @@ namespace Mandelbrot.Models
             Normalize();
         }
 
+        public BigDecimal(double num)
+        {
+            Exponent = 0;
+            while (num % 1 != 0)
+            {
+                num *= 10;
+                Exponent--;
+            }
+            Significand = (BigInteger)num;
+
+            Normalize();
+        }
+
         /// <summary>
         /// Remove trailing zeroes on significand
         /// </summary>
@@ -50,7 +63,13 @@ namespace Mandelbrot.Models
         /// </summary>
         public void Truncate()
         {
-            throw new NotImplementedException();
+            Normalize();
+            while(NumberOfDigits(Significand) > Precision)
+            {
+                Significand /= 10;
+                Exponent++;
+            }
+            Normalize();
         }
 
 
@@ -75,16 +94,6 @@ namespace Mandelbrot.Models
             return new BigDecimal(a.Significand * b.Significand, a.Exponent * b.Exponent);
         }
 
-        public static BigDecimal operator /(BigDecimal a, BigDecimal b)
-        {
-            throw new NotImplementedException();
-        }
-
-        public static BigDecimal Sqrt(BigDecimal a)
-        {
-            throw new NotImplementedException();
-        }
-
 
         public static bool operator ==(BigDecimal a, BigDecimal b)
         {
@@ -107,6 +116,11 @@ namespace Mandelbrot.Models
         private static BigInteger Align(BigDecimal num, BigDecimal reference)
         {
             return num.Significand * BigInteger.Pow(10, num.Exponent - reference.Exponent);
+        }
+
+        private static int NumberOfDigits(BigInteger num)
+        {
+            return num.Sign == -1 ? num.ToString().Length - 1 : num.ToString().Length;
         }
 
 

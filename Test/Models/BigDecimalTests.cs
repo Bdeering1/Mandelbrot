@@ -24,6 +24,32 @@ public class BigDecimalTests
     }
 
     [Fact]
+    public void Constructor_Double_SetsValuesCorrectly()
+    {
+        outputHelper.WriteLine("Acting...");
+        var sut = new BigDecimal(1.01);
+
+        outputHelper.WriteLine("Asserting...");
+        Assert.Equal(101, sut.Significand);
+        Assert.Equal(-2, sut.Exponent);
+    }
+
+    [Fact]
+    public void Truncate_LowPrecision_RemovesExtraDigits()
+    {
+        outputHelper.WriteLine("Arranging...");
+        BigDecimal.Precision = 2;
+        var sut = new BigDecimal(1.2345);
+
+        outputHelper.WriteLine("Acting...");
+        sut.Truncate();
+
+        outputHelper.WriteLine("Asserting...");
+        Assert.Equal(12, sut.Significand);
+        Assert.Equal(-1, sut.Exponent);
+    }
+
+    [Fact]
     public void Add_DifferentExponents_ReturnsCorrectSum()
     {
         outputHelper.WriteLine("Arranging...");
