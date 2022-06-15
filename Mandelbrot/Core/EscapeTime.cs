@@ -1,5 +1,5 @@
 ﻿using System;
-using Mandelbrot.Value_Objects;
+using Mandelbrot.Models;
 
 namespace Mandelbrot.Core
 {

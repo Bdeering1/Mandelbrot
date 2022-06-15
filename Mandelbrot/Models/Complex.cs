@@ -1,4 +1,4 @@
-﻿namespace Mandelbrot.Value_Objects
+﻿namespace Mandelbrot.Models
 {
     public struct Complex
     {
