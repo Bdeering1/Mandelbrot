@@ -1,11 +1,11 @@
-﻿namespace Value_Objects
+﻿namespace Mandelbrot.Value_Objects
 {
     public struct Complex
     {
-        public double r;
-        public double i;
+        public decimal r;
+        public decimal i;
 
-        public Complex(double real, double imaginary)
+        public Complex(decimal real, decimal imaginary)
         {
             r = real;
             i = imaginary;
@@ -13,6 +13,7 @@
 
         public static Complex operator +(Complex a, Complex b) =>
             new Complex(a.r + b.r, a.i + b.i);
+
         public static Complex operator -(Complex a, Complex b) =>
             new Complex(a.r - b.r, a.i - b.i);
 

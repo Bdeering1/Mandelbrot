@@ -1,7 +1,7 @@
 ﻿using System;
-using Value_Objects;
+using Mandelbrot.Value_Objects;
 
-namespace Mandelbrot
+namespace Mandelbrot.Core
 {
     public class EscapeTime
     {
@@ -11,9 +11,9 @@ namespace Mandelbrot
             var current = new Complex(0, 0);
 
             int iter = 0;
-            int maxIterations = 200;
+            int maxIter = 200;
 
-            while(Math.Sqrt((Math.Pow(current.r, 2) + Math.Pow(current.i, 2))) <= 2 && iter <= maxIterations)
+            while (Math.Sqrt(Math.Pow((double)current.r, 2) + Math.Pow((double)current.i, 2)) <= 2 && iter <= maxIter)
             {
                 current = current * current + constant;
                 iter++;

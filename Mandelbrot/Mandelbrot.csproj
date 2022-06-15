@@ -9,4 +9,10 @@
   <PropertyGroup Condition=" '$(RunConfiguration)' == 'Default' ">
     <ExternalConsole>true</ExternalConsole>
   </PropertyGroup>
+  <ItemGroup>
+    <None Remove="Algorithms\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Core Logic\" />
+  </ItemGroup>
 </Project>
