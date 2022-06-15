@@ -5,17 +5,18 @@ namespace Mandelbrot.Core
 {
     public class EscapeTime
     {
-        public static int CalcEscapeTime(Complex pt)
+        public static int CalcEscapeTime(BigComplex pt)
         {
-            var constant = new Complex(pt.r, pt.i);
-            var current = new Complex(0, 0);
+            var constant = new BigComplex(pt.r, pt.i);
+            var current = new BigComplex(new BigDecimal(0), new BigDecimal(0));
 
             int iter = 0;
             int maxIter = 200;
 
-            while (Math.Sqrt(Math.Pow((double)current.r, 2) + Math.Pow((double)current.i, 2)) <= 2 && iter <= maxIter)
+            while (current.r * current.r + current.i * current.i <= 4 && iter <= maxIter)
             {
                 current = current * current + constant;
+                Console.WriteLine(current.ToString());
                 iter++;
             }
             return iter;
