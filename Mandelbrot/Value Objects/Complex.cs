@@ -2,10 +2,10 @@
 {
     public struct Complex
     {
-        public decimal r;
-        public decimal i;
+        public double r;
+        public double i;
 
-        public Complex(decimal real, decimal imaginary)
+        public Complex(double real, double imaginary)
         {
             r = real;
             i = imaginary;
@@ -13,7 +13,7 @@
 
         public static Complex operator +(Complex a, Complex b) =>
             new Complex(a.r + b.r, a.i + b.i);
-        public static Complex operator -(Complex a, Complex b)=>
+        public static Complex operator -(Complex a, Complex b) =>
             new Complex(a.r - b.r, a.i - b.i);
 
         public static Complex operator *(Complex a, Complex b) =>
