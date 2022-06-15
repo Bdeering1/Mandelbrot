@@ -13,7 +13,7 @@ namespace Mandelbrot.Core
             int iter = 0;
             int maxIter = 200;
 
-            while (current.r * current.r + current.i * current.i <= 4 && iter <= maxIter)
+            while (current.r * current.r + current.i * current.i <= new BigDecimal(4) && iter <= maxIter)
             {
                 current = current * current + constant;
                 Console.WriteLine(current.ToString());

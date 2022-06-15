@@ -61,15 +61,19 @@ namespace Mandelbrot.Models
         /// <summary>
         /// Truncate to the given precision by removing least significant digits
         /// </summary>
-        public void Truncate()
+        public BigDecimal Truncate()
         {
-            Normalize();
-            while(NumberOfDigits(Significand) > Precision)
+            var shortened = this;
+            shortened.Normalize();
+
+            while(NumberOfDigits(shortened.Significand) > Precision)
             {
-                Significand /= 10;
-                Exponent++;
+                shortened.Significand /= 10;
+                shortened.Exponent++;
             }
-            Normalize();
+
+            shortened.Normalize();
+            return shortened;
         }
 
 
@@ -91,7 +95,7 @@ namespace Mandelbrot.Models
 
         public static BigDecimal operator *(BigDecimal a, BigDecimal b)
         {
-            return new BigDecimal(a.Significand * b.Significand, a.Exponent * b.Exponent);
+            return  new BigDecimal(a.Significand * b.Significand, a.Exponent + b.Exponent);
         }
 
 
@@ -140,7 +144,11 @@ namespace Mandelbrot.Models
 
         private static int NumberOfDigits(BigInteger num)
         {
-            return num.Sign == -1 ? num.ToString().Length - 1 : num.ToString().Length;
+            return num == 0
+                ? 1
+                : num < 0
+                ? (int)Math.Floor(BigInteger.Log10(-num) + 1)
+                : (int)Math.Floor(BigInteger.Log10(num) + 1);
         }
 
 

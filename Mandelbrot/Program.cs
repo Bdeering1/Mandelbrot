@@ -19,6 +19,7 @@ public class Program
         Console.ForegroundColor = ConsoleColor.Cyan;
         Console.WriteLine("Hello world!");
 
+        Core.EscapeTime.CalcEscapeTime(new Models.BigComplex(new Models.BigDecimal(0.00001), new Models.BigDecimal(0.00002)));
     }
 
     private static void ConfigureServices(IServiceCollection services, IConfiguration configuration)
