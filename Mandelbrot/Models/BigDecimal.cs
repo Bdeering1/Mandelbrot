@@ -15,10 +15,12 @@ namespace Mandelbrot.Models
         public BigInteger Significand { get; set; }
         public int Exponent { get; set; }
 
-        public BigDecimal(BigInteger significand, int exponent)
+        public BigDecimal(BigInteger significand, int exponent = 0)
         {
             Significand = significand;
             Exponent = exponent;
+
+            Normalize();
         }
 
         /// <summary>
@@ -26,7 +28,6 @@ namespace Mandelbrot.Models
         /// </summary>
         public void Normalize()
         {
-            if (Exponent == 0) return;
             if (Significand == 0)
             {
                 Exponent = 0;
@@ -99,8 +100,8 @@ namespace Mandelbrot.Models
         private static BigDecimal Add(BigDecimal a, BigDecimal b)
         {
             return a.Exponent > b.Exponent
-                ? new BigDecimal(Align(a, b), b.Exponent)
-                : new BigDecimal(Align(b, a), a.Exponent);
+                ? new BigDecimal(Align(a, b) + b.Significand, b.Exponent)
+                : new BigDecimal(Align(b, a) + a.Significand, a.Exponent);
         }
 
         private static BigInteger Align(BigDecimal num, BigDecimal reference)
