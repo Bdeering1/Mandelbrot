@@ -1,4 +1,6 @@
 ﻿using System;
+using Mandelbrot.Core;
+using Mandelbrot.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -16,10 +18,10 @@ public class Program
         var services = new ServiceCollection();
         ConfigureServices(services, configuration);
 
-        Console.ForegroundColor = ConsoleColor.Cyan;
-        Console.WriteLine("Hello world!");
-
-        Core.EscapeTime.CalcEscapeTime(new Models.BigComplex(new Models.BigDecimal(0.00001), new Models.BigDecimal(0.00002)));
+        Console.WriteLine("Program started.");
+        var point = new BigComplex((BigDecimal)0.00001, (BigDecimal)0.00001);
+        var escapeTime = EscapeTime.CalcEscapeTime(point);
+        Console.WriteLine($"Point: {point} Escape time: {escapeTime}");
     }
 
     private static void ConfigureServices(IServiceCollection services, IConfiguration configuration)

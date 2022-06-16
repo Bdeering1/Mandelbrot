@@ -5,25 +5,28 @@ using System.Numerics;
 namespace Mandelbrot.Models
 {
     /// <summary>
-    /// Arbitrary precision decimal
+    /// Arbitrary precision decimal<br/>
     /// Based on https://gist.github.com/JcBernack/0b4eef59ca97ee931a2f45542b9ff06d
     /// </summary>
     public struct BigDecimal
     {
-        public static int Precision { get; set; } = 50;
+        public static int Precision { get; set; } = 100000;
 
         public BigInteger Significand { get; set; }
         public int Exponent { get; set; }
 
-        public BigDecimal(BigInteger significand, int exponent = 0)
+
+        public BigDecimal(BigInteger significand, int exponent = 0, bool truncate = false)
         {
             Significand = significand;
             Exponent = exponent;
 
             Normalize();
+
+            if (truncate) Truncate();
         }
 
-        public BigDecimal(double num)
+        public BigDecimal(decimal num)
         {
             Exponent = 0;
             while (num % 1 != 0)
@@ -63,18 +66,27 @@ namespace Mandelbrot.Models
         /// </summary>
         public BigDecimal Truncate()
         {
-            var shortened = this;
-            shortened.Normalize();
+            Normalize();
 
-            while(NumberOfDigits(shortened.Significand) > Precision)
-            {
-                shortened.Significand /= 10;
-                shortened.Exponent++;
-            }
+            var numDigs = NumberOfDigits(Significand);
+            var digsToRemove = Math.Max(0, numDigs - Precision);
+            Significand /= BigInteger.Pow(10, digsToRemove);
+            Exponent += digsToRemove;
 
-            shortened.Normalize();
-            return shortened;
+            Normalize();
+            return this;
         }
+
+
+        public static explicit operator BigDecimal(int num) => new(num);
+
+        public static explicit operator BigDecimal(long num) => new(num);
+
+        public static explicit operator BigDecimal(decimal num) => new(num);
+
+        public static explicit operator BigDecimal(double num) => new((decimal)num);
+
+        public static explicit operator BigDecimal(float num) => new((decimal)num);
 
 
         public static BigDecimal operator -(BigDecimal a)
@@ -95,7 +107,7 @@ namespace Mandelbrot.Models
 
         public static BigDecimal operator *(BigDecimal a, BigDecimal b)
         {
-            return  new BigDecimal(a.Significand * b.Significand, a.Exponent + b.Exponent);
+            return new BigDecimal(a.Significand * b.Significand, a.Exponent + b.Exponent, true);
         }
 
 
@@ -142,7 +154,7 @@ namespace Mandelbrot.Models
             return num.Significand * BigInteger.Pow(10, num.Exponent - reference.Exponent);
         }
 
-        private static int NumberOfDigits(BigInteger num)
+        public static int NumberOfDigits(BigInteger num)
         {
             return num == 0
                 ? 1

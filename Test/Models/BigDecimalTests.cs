@@ -1,4 +1,5 @@
-﻿using Mandelbrot.Models;
+﻿using System.Numerics;
+using Mandelbrot.Models;
 using Xunit.Abstractions;
 
 namespace Test.Models;
@@ -27,26 +28,24 @@ public class BigDecimalTests
     public void Constructor_Double_SetsValuesCorrectly()
     {
         outputHelper.WriteLine("Acting...");
-        var sut = new BigDecimal(1.01);
+        var sut = (BigDecimal)1.01;
 
         outputHelper.WriteLine("Asserting...");
         Assert.Equal(101, sut.Significand);
         Assert.Equal(-2, sut.Exponent);
     }
 
-    [Fact]
-    public void Truncate_LowPrecision_RemovesExtraDigits()
+    [Theory]
+    [BigDecimalTestData]
+    public void Truncate_LowPrecision_RemovesExtraDigits(BigDecimal sut, int precision, int expectedSig, int expectedExp)
     {
-        outputHelper.WriteLine("Arranging...");
-        BigDecimal.Precision = 2;
-        var sut = new BigDecimal(1.2345);
-
         outputHelper.WriteLine("Acting...");
+        BigDecimal.Precision = precision;
         sut.Truncate();
 
         outputHelper.WriteLine("Asserting...");
-        Assert.Equal(12, sut.Significand);
-        Assert.Equal(-1, sut.Exponent);
+        Assert.Equal(expectedSig, sut.Significand);
+        Assert.Equal(expectedExp, sut.Exponent);
     }
 
     [Fact]
