@@ -1,9 +1,9 @@
 ﻿namespace Mandelbrot.Models
 {
-    public struct BigComplex
+    public class BigComplex
     {
-        public BigDecimal r;
-        public BigDecimal i;
+        public BigDecimal r { get; private set; }
+        public BigDecimal i { get; private set; }
 
         public BigComplex(BigDecimal real, BigDecimal imaginary)
         {
@@ -20,6 +20,7 @@
         public static BigComplex operator *(BigComplex a, BigComplex b) =>
             new BigComplex(a.r * b.r - a.i * b.i,
                         a.r * b.i + a.i * b.r);
+
 
         public override string ToString() => $"{r.Truncate()} + {i.Truncate()}i";
 

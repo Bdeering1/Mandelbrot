@@ -19,7 +19,7 @@ public class Program
         ConfigureServices(services, configuration);
 
         Console.WriteLine("Program started.");
-        var point = new BigComplex((BigDecimal)0.00001, (BigDecimal)0.00001);
+        var point = new BigComplex((BigDecimal)0.350511, (BigDecimal)0.350511);
         var escapeTime = EscapeTime.CalcEscapeTime(point);
         Console.WriteLine($"Point: {point} Escape time: {escapeTime}");
     }

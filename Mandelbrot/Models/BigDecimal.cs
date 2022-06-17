@@ -8,12 +8,12 @@ namespace Mandelbrot.Models
     /// Arbitrary precision decimal<br/>
     /// Based on https://gist.github.com/JcBernack/0b4eef59ca97ee931a2f45542b9ff06d
     /// </summary>
-    public struct BigDecimal
+    public class BigDecimal
     {
-        public static int Precision { get; set; } = 100000;
+        public static int Precision { get; set; } = 100;
 
-        public BigInteger Significand { get; set; }
-        public int Exponent { get; set; }
+        public BigInteger Significand { get; private set; }
+        public int Exponent { get; private set; }
 
 
         public BigDecimal(BigInteger significand, int exponent = 0, bool truncate = false)
@@ -174,6 +174,6 @@ namespace Mandelbrot.Models
             throw new NotImplementedException();
         }
 
-        public override string ToString() => $"{Significand}e{Exponent}";
+        public override string ToString() => $"{Significand}e{Exponent} ({NumberOfDigits(Significand)}) ";
     }
 }
