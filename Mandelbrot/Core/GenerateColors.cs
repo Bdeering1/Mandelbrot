@@ -1,25 +1,12 @@
 ﻿using System.Collections.Generic;
-using System;
 using System.Drawing;
 using System.Linq;
+using Mandelbrot.Models;
 
 namespace Mandelbrot.Core
 {
     public class GenerateColors
     {
-        struct HSL
-        {
-            public HSL(double h, double s, double l)
-            {
-                hue = h;
-                saturation = s;
-                lightness = l;
-            }
-            public double hue;
-            public double saturation;
-            public double lightness;
-        }
-
         //this needs some redoing cuz messy but it works
         public static List<Color> GetGradients(int rangeLightness, int rangeHue)
         {
