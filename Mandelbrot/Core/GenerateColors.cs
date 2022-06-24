@@ -8,28 +8,33 @@ namespace Mandelbrot.Core
 {
     public class GenerateColors
     {
-        public static List<Color> GetGradients(int maxIter, double ratio) //ratio is hue-lightness (i.e 0.7 is 70% hue, 30% lightness)
+        /// <summary>
+        /// Creates list list of colors in a gradient from hue 0-360
+        /// </summary>
+        /// <param name="maxIter">Number of colors in the gradient</param>
+        /// <param name="ratio">Ratio of Hue/Lightness steps</param>
+        /// <returns>List of colors</returns>
+        public static List<Color> GetGradients(int maxIter, double ratio)
         {
             var colors = new List<HSL>();
 
-            //inner = √(total(1 - ratio) / ratio)
-            //outer = total / inner
-
+            //Calculate how many iterations we need for each loop
             double rangeLightness = Math.Sqrt((maxIter * (1 - ratio)) / ratio);
             double rangeHue = maxIter / rangeLightness;
 
-            double ratioL = 1.0 / (maxIter * (1 - ratio));
+            // 
+            double ratioL = 1.0 / (maxIter/(rangeLightness/1.5) * (1 - ratio));
             double ratioH = 1.0 / (rangeHue * ratio);
-
 
             double s = 1.0;
 
             //generate colors
             for(int i = 0; i < rangeLightness; i++)
             {
-                double l = 1.0 - ratioL * i;
-                //keep lightness within 0.1-0.6 (dont want black and white for every color)
-                l = l * 0.55 + 0.1;
+                double l = ratioL * (i + 1);
+                if (l > 1) l = 1;
+                if (l < 0) l = 0;
+
                 for(int j = 0; j < rangeHue; j++)
                 {
                     double h = ratioH * j;
@@ -48,9 +53,9 @@ namespace Mandelbrot.Core
 
         private static Color FromHsl(HSL hsl)
         {
-            int r = 0;
-            int g = 0;
-            int b = 0;
+            int r;
+            int g;
+            int b;
 
             if (hsl.saturation == 0)
             {
