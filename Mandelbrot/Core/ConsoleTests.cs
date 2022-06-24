@@ -12,7 +12,7 @@ namespace Mandelbrot.Core
 
             Console.WriteLine($"Interpolating from ({ColorString(start)}) to ({ColorString(end)}).");
 
-            foreach (var c in GenerateColors.GetGradients(200, 0.7))
+            foreach (var c in GenerateColors.GetGradients(2000, 0.7))
             {
                 Console.BackgroundColor = GetConsoleColor(c);
                 Console.Write("  ");

@@ -22,7 +22,6 @@ namespace Mandelbrot.Core
             double rangeLightness = Math.Sqrt((maxIter * (1 - ratio)) / ratio);
             double rangeHue = maxIter / rangeLightness;
 
-            // 
             double ratioL = 1.0 / (maxIter/(rangeLightness/1.5) * (1 - ratio));
             double ratioH = 1.0 / (rangeHue * ratio);
 
