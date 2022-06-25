@@ -1,4 +1,5 @@
-﻿using Mandelbrot.Core;
+﻿using ClientProj;
+using Mandelbrot.Core;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -20,6 +21,8 @@ public class Program
         //var escapeTime = EscapeTime.CalcEscapeTime(point);
         //Console.WriteLine($"Point: {point} Escape time: {escapeTime}");
         ConsoleTests.Colors();
+
+        var client = new Client();
     }
 
     private static void ConfigureServices(IServiceCollection services, IConfiguration configuration)
