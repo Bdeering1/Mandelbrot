@@ -12,13 +12,10 @@ public class Program
 {
     public static void Main(string[] args)
     {
-        IConfiguration configuration = new ConfigurationBuilder().AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-            .AddEnvironmentVariables()
-            .AddCommandLine(args)
-            .Build();
-
-        var services = new ServiceCollection();
-        ConfigureServices(services, configuration);
+        //IConfiguration configuration = new ConfigurationBuilder().AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+        //    .AddEnvironmentVariables()
+        //    .AddCommandLine(args)
+        //    .Build();
 
         //ConsoleTests.Colors();
 
@@ -30,13 +27,6 @@ public class Program
             .ConfigureWebHostDefaults(webBuilder =>
             {
                 webBuilder.UseStartup<Startup>();
-                webBuilder.UseUrls("http://*:5002", "https://*:5003");
+                webBuilder.UseUrls("http://*:5000", "https://*:5001");
             });
-
-    private static void ConfigureServices(IServiceCollection services, IConfiguration configuration)
-    {
-        services.AddSingleton(configuration);
-        services.AddControllersWithViews();
-        services.AddRazorPages();
-    }
 }
