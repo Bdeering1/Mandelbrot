@@ -10,7 +10,7 @@
     <ExternalConsole>true</ExternalConsole>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Client\Client.csproj">
+    <ProjectReference Include="..\MacOSClient\MacOSClient.csproj">
       <GlobalPropertiesToRemove></GlobalPropertiesToRemove>
     </ProjectReference>
   </ItemGroup>

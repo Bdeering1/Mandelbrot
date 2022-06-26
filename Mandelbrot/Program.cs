@@ -21,8 +21,6 @@ public class Program
         //var escapeTime = EscapeTime.CalcEscapeTime(point);
         //Console.WriteLine($"Point: {point} Escape time: {escapeTime}");
         ConsoleTests.Colors();
-
-        var client = new Client();
     }
 
     private static void ConfigureServices(IServiceCollection services, IConfiguration configuration)
