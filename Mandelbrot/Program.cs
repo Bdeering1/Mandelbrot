@@ -1,7 +1,10 @@
-﻿using ClientProj;
+﻿using System;
 using Mandelbrot.Core;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 namespace Mandelbrot;
 
@@ -17,14 +20,23 @@ public class Program
         var services = new ServiceCollection();
         ConfigureServices(services, configuration);
 
-        //var point = new BigComplex((BigDecimal)0.350511, (BigDecimal)0.350511);
-        //var escapeTime = EscapeTime.CalcEscapeTime(point);
-        //Console.WriteLine($"Point: {point} Escape time: {escapeTime}");
-        ConsoleTests.Colors();
+        //ConsoleTests.Colors();
+
+        CreateHostBuilder(args).Build().Run();
     }
+
+    public static IHostBuilder CreateHostBuilder(string[] args) =>
+        Host.CreateDefaultBuilder(args)
+            .ConfigureWebHostDefaults(webBuilder =>
+            {
+                webBuilder.UseStartup<Startup>();
+                webBuilder.UseUrls("http://*:5002", "https://*:5003");
+            });
 
     private static void ConfigureServices(IServiceCollection services, IConfiguration configuration)
     {
         services.AddSingleton(configuration);
+        services.AddControllersWithViews();
+        services.AddRazorPages();
     }
 }

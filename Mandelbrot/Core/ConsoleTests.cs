@@ -1,10 +1,18 @@
 ﻿using System;
 using System.Drawing;
+using Mandelbrot.Models;
 
 namespace Mandelbrot.Core
 {
 	public class ConsoleTests
 	{
+        public static void EscapeTimeTest()
+        {
+            var point = new BigComplex((BigDecimal)0.350511, (BigDecimal)0.350511);
+            var escapeTime = EscapeTime.CalcEscapeTime(point);
+            Console.WriteLine($"Point: {point} Escape time: {escapeTime}");
+        }
+
         public static void Colors()
         {
             var start = Color.Black;
