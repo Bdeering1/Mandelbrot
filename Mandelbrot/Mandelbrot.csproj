@@ -9,9 +9,4 @@
   <PropertyGroup Condition=" '$(RunConfiguration)' == 'Default' ">
     <ExternalConsole>true</ExternalConsole>
   </PropertyGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\MacOSClient\MacOSClient.csproj">
-      <GlobalPropertiesToRemove></GlobalPropertiesToRemove>
-    </ProjectReference>
-  </ItemGroup>
 </Project>
