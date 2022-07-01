@@ -1,6 +1,6 @@
 ﻿namespace Mandelbrot.Models
 {
-    struct HSL
+    public struct HSL
     {
         public HSL(double h, double s, double l)
         {
