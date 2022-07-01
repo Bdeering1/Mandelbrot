@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using Mandelbrot.Models;
+﻿using System.Drawing;
+using Mandelbrot.Shared.Models;
 
 namespace Mandelbrot.Core
 {

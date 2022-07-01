@@ -1,7 +1,6 @@
-﻿using System;
-using Mandelbrot.Models;
+﻿using Mandelbrot.Shared.Models;
 
-namespace Mandelbrot.Core
+namespace Mandelbrot.Server.Core
 {
     public class EscapeTime
     {

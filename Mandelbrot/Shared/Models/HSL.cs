@@ -1,4 +1,4 @@
-﻿namespace Mandelbrot.Models
+﻿namespace Mandelbrot.Shared.Models
 {
     public struct HSL
     {

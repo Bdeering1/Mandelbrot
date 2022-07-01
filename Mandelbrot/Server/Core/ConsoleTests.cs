@@ -1,11 +1,11 @@
-﻿using System;
-using System.Drawing;
-using Mandelbrot.Models;
+﻿using System.Drawing;
+using Mandelbrot.Core;
+using Mandelbrot.Shared.Models;
 
-namespace Mandelbrot.Core
+namespace Mandelbrot.Server.Core
 {
-	public class ConsoleTests
-	{
+    public class ConsoleTests
+    {
         public static void EscapeTimeTest()
         {
             var point = new BigComplex((BigDecimal)0.350511, (BigDecimal)0.350511);
@@ -31,12 +31,12 @@ namespace Mandelbrot.Core
             Console.WriteLine("\nNote: console colors are very limited, so the color blocks are just a rough approximations.");
         }
 
-		public static ConsoleColor GetConsoleColor(Color c)
+        public static ConsoleColor GetConsoleColor(Color c)
         {
-            int index = (c.R > 128 | c.G > 128 | c.B > 128) ? 8 : 0;
-            index |= (c.R > 64) ? 4 : 0;
-            index |= (c.G > 64) ? 2 : 0;
-            index |= (c.B > 64) ? 1 : 0;
+            int index = c.R > 128 | c.G > 128 | c.B > 128 ? 8 : 0;
+            index |= c.R > 64 ? 4 : 0;
+            index |= c.G > 64 ? 2 : 0;
+            index |= c.B > 64 ? 1 : 0;
 
             return (ConsoleColor)index;
         }
@@ -45,6 +45,6 @@ namespace Mandelbrot.Core
         {
             return $"{c.R}, {c.G}, {c.B}";
         }
-	}
+    }
 }
 

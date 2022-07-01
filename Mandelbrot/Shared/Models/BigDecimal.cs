@@ -2,7 +2,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 
-namespace Mandelbrot.Models
+namespace Mandelbrot.Shared.Models
 {
     /// <summary>
     /// Arbitrary precision decimal<br/>
