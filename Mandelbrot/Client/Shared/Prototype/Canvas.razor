@@ -1,0 +1,8 @@
+﻿<div class="canvas" style="@($"width: {PointSize * Width}px;")">
+    @foreach (var color in Colors)
+    {
+    <div class="point" style="@($"width: {PointSize}px;" +
+                                $"height: {PointSize}px;" +
+                                $"background: {GetHexString(color)};")" />
+    }
+</div>

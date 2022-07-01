@@ -6,7 +6,7 @@ namespace Mandelbrot.Core
     public class GenerateColors
     {
         /// <summary>
-        /// Creates list list of colors in a gradient from hue 0-360
+        /// Creates a list of colors in a gradient from hue 0-360
         /// </summary>
         /// <param name="maxIter">Number of colors in the gradient</param>
         /// <param name="ratio">Ratio of Hue/Lightness steps</param>

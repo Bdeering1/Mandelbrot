@@ -29,8 +29,8 @@
     <Folder Include="Models\" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Mandelbrot\Server\Mandelbrot.Server.csproj" />
     <ProjectReference Include="..\Mandelbrot\Shared\Mandelbrot.Shared.csproj" />
     <ProjectReference Include="..\Mandelbrot\Client\Mandelbrot.Client.csproj" />
+    <ProjectReference Include="..\Server\Mandelbrot.Server.csproj" />
   </ItemGroup>
 </Project>

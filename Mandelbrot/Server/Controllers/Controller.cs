@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Drawing;
+using Mandelbrot.Core;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Mandelbrot.Server.Controllers;
 
@@ -13,16 +15,12 @@ public class Controller : ControllerBase
         this.logger = logger;
     }
 
-    //[HttpGet]
-    //public IEnumerable<WeatherForecast> Get()
-    //{
-    //    return Enumerable.Range(1, 5).Select(index => new WeatherForecast
-    //    {
-    //        Date = DateTime.Now.AddDays(index),
-    //        TemperatureC = Random.Shared.Next(-20, 55),
-    //        Summary = Summaries[Random.Shared.Next(Summaries.Length)]
-    //    })
-    //    .ToArray();
-    //}
+    [HttpGet]
+    [Route("colors")]
+    public List<Color> GetColors()
+    {
+        var res = GenerateColors.GetGradients(20, 0.7);
+        return res;
+    }
 }
 

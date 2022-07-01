@@ -9,7 +9,6 @@
   <PropertyGroup Condition=" '$(RunConfiguration)' == 'Default' ">
     <ExternalConsole>true</ExternalConsole>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(RunConfiguration)' == 'Custom' " />
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="6.0.6" />
   </ItemGroup>
@@ -17,11 +16,5 @@
   <ItemGroup>
     <ProjectReference Include="..\Client\Mandelbrot.Client.csproj" />
     <ProjectReference Include="..\Shared\Mandelbrot.Shared.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Remove="Core\" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Core\" />
   </ItemGroup>
 </Project>

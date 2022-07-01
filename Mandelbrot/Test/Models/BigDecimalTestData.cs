@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Numerics;
 using System.Reflection;
-using Mandelbrot.Models;
+using Mandelbrot.Shared.Models;
 using Xunit.Sdk;
 
 namespace Test.Models

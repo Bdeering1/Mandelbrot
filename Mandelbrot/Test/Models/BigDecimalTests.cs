@@ -1,5 +1,5 @@
 ﻿using System.Numerics;
-using Mandelbrot.Models;
+using Mandelbrot.Shared.Models;
 using Xunit.Abstractions;
 
 namespace Test.Models;

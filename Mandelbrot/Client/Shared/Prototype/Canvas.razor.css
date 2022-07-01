@@ -1,0 +1,9 @@
+﻿.canvas {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.point {
+    display: inline-block;
+    flex-shrink: 0;
+}
