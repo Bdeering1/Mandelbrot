@@ -4,11 +4,10 @@ namespace Mandelbrot.Server.Core
 {
     public class Camera
     {
-        //not sure if this is the correct way to set class defaults but this is how it is for now
         private BigComplex pos { get; } = new((BigDecimal) 0, (BigDecimal) 0);
-        private BigDecimal zoom { get; } = (BigDecimal) 0;
+        private double zoom { get; } = 0.0;
 
-        public Camera(BigComplex pos, BigDecimal zoom)
+        public Camera(BigComplex pos, double zoom)
         {
             this.pos = pos;
             this.zoom = zoom;
@@ -18,12 +17,13 @@ namespace Mandelbrot.Server.Core
         {
             BigComplex realCoords = PxToCoord(x, y, 400, 400);
             realCoords += pos;
+            return realCoords;
         }
 
         private BigComplex PxToCoord(int x, int y, int width, int height)
         {
-            BigDecimal newX = new BigDecimal(((x * 4) / width) - 2);
-            BigDecimal newY = new BigDecimal(((-y * 4) / height) + 2);
+            BigDecimal newX = (BigDecimal)(((x * 4) / (width * zoom)) - (4 / (2 * zoom)));
+            BigDecimal newY = (BigDecimal)(((-y * 4) / (height * zoom)) + (4 / (2 * zoom)));
 
             return new(newX, newY);
         }
