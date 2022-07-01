@@ -1,6 +1,6 @@
 ﻿{
-  "name": "Client",
-  "short_name": "Client",
+  "name": "Mandelbrot",
+  "short_name": "Mandelbrot",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#ffffff",
