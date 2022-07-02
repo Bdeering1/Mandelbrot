@@ -13,9 +13,9 @@ namespace Mandelbrot.Client
             this.http = http;
         }
 
-        public async Task<List<Color>> GetColors()
+        public async Task<List<string>> GetColors()
         {
-            var res = await http.GetFromJsonAsync<List<Color>>("colors");
+            var res = await http.GetFromJsonAsync<List<string>>("colors");
             return res;
         }
     }

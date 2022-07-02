@@ -19,17 +19,11 @@ else
     [Inject]
     public ApiClient client { get; set; }
 
-    private List<Color> Colors { get; set; }
+    private List<string> Colors { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
         Colors = await client.GetColors();
-
-        Console.WriteLine("Page:");
-        foreach (var color in Colors)
-        {
-            Console.WriteLine(color);
-        }
         await base.OnInitializedAsync();
     }
 }

@@ -17,10 +17,13 @@ public class Controller : ControllerBase
 
     [HttpGet]
     [Route("colors")]
-    public List<Color> GetColors()
+    public List<string> GetColors()
     {
-        var res = GenerateColors.GetGradients(20, 0.7);
+        var res = GenerateColors.GetGradients(20, 0.7).Select(x => GetHexString(x)).ToList();
         return res;
     }
+
+    private string GetHexString(Color c) =>
+            $"#{c.R:X2}{c.G:X2}{c.B:X2}";
 }
 
