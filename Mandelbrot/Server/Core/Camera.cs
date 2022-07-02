@@ -4,8 +4,11 @@ namespace Mandelbrot.Server.Core
 {
     public class Camera
     {
-        private BigComplex pos { get; } = new((BigDecimal) 0, (BigDecimal) 0);
-        private double zoom { get; } = 0.0;
+        private const int DOMAIN = 4;
+        private const int RANGE = 4;
+
+        private BigComplex pos { get; set; } = new((BigDecimal) 0, (BigDecimal) 0);
+        private double zoom { get; set; } = 0.0;
 
         public Camera(BigComplex pos, double zoom)
         {
@@ -22,8 +25,8 @@ namespace Mandelbrot.Server.Core
 
         private BigComplex PxToCoord(int x, int y, int width, int height)
         {
-            BigDecimal newX = (BigDecimal)(((x * 4) / (width * zoom)) - (4 / (2 * zoom)));
-            BigDecimal newY = (BigDecimal)(((-y * 4) / (height * zoom)) + (4 / (2 * zoom)));
+            BigDecimal newX = (BigDecimal)(((x * DOMAIN) / (width * zoom)) - (DOMAIN / (2 * zoom)));
+            BigDecimal newY = (BigDecimal)(((-y * RANGE) / (height * zoom)) + (RANGE / (2 * zoom)));
 
             return new(newX, newY);
         }

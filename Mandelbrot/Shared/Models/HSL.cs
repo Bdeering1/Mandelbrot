@@ -1,15 +1,16 @@
 ﻿namespace Mandelbrot.Shared.Models
 {
-    public struct HSL
+    public class Hsl
     {
-        public HSL(double h, double s, double l)
+        public double Hue { get; set; }
+        public double Saturation { get; set; }
+        public double Lightness { get; set; }
+
+        public Hsl(double h, double s, double l)
         {
-            hue = h;
-            saturation = s;
-            lightness = l;
+            Hue = h;
+            Saturation = s;
+            Lightness = l;
         }
-        public double hue;
-        public double saturation;
-        public double lightness;
     }
 }

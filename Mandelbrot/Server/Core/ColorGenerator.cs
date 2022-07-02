@@ -13,63 +13,63 @@ namespace Mandelbrot.Core
         /// <returns>List of colors</returns>
         public static List<Color> GetGradients(int maxIter, double ratio)
         {
-            var colors = new List<HSL>();
+            var colors = new List<Hsl>();
 
             //Calculate how many iterations we need for each loop
             double rangeLightness = Math.Sqrt((maxIter * (1 - ratio)) / ratio);
             double rangeHue = maxIter / rangeLightness;
 
-            double ratioL = 1.0 / (maxIter/(rangeLightness/1.5) * (1 - ratio));
-            double ratioH = 1.0 / (rangeHue * ratio);
+            double stepL = 1.0 / (maxIter/(rangeLightness/1.5) * (1 - ratio));
+            double stepH = 1.0 / (rangeHue * ratio);
 
             double s = 1.0;
 
             //generate colors
             for(int i = 0; i < rangeLightness; i++)
             {
-                double l = ratioL * (i + 1);
+                double l = stepL * (i + 1);
                 if (l > 1) l = 1;
                 if (l < 0) l = 0;
 
                 for(int j = 0; j < rangeHue; j++)
                 {
-                    double h = ratioH * j;
+                    double h = stepH * j;
 
-		            colors.Add(new HSL(h, s, l));
+		            colors.Add(new Hsl(h, s, l));
                 }
             }
             //sort the list of colors
-            var sorted = colors.OrderBy(o => o.hue).ThenBy(o => o.lightness).ToList();
+            var sorted = colors.OrderBy(o => o.Hue).ThenBy(o => o.Lightness).ToList();
 
             //makes a new list as color objects from the sorted list
-            var asColors = sorted.ConvertAll(new Converter<HSL, Color>(FromHsl));
+            var asColors = sorted.ConvertAll(new Converter<Hsl, Color>(FromHsl));
             
             return asColors;
         }
 
-        public static string GetHexString(Color c) =>
+        public static string GetHex(Color c) =>
         $"#{c.R:X2}{c.G:X2}{c.B:X2}";
 
-        private static Color FromHsl(HSL hsl)
+        private static Color FromHsl(Hsl hsl)
         {
             int r;
             int g;
             int b;
 
-            if (hsl.saturation == 0)
+            if (hsl.Saturation == 0)
             {
-                r = g = b = (int)(hsl.lightness * 255);
+                r = g = b = (int)(hsl.Lightness * 255);
             }
             else
             {
                 double v1, v2;
 
-                v2 = (hsl.lightness < 0.5) ? (hsl.lightness * (1 + hsl.saturation)) : ((hsl.lightness + hsl.saturation) - (hsl.lightness * hsl.saturation));
-                v1 = 2 * hsl.lightness - v2;
+                v2 = (hsl.Lightness < 0.5) ? (hsl.Lightness * (1 + hsl.Saturation)) : ((hsl.Lightness + hsl.Saturation) - (hsl.Lightness * hsl.Saturation));
+                v1 = 2 * hsl.Lightness - v2;
 
-                r = (int)(255 * HueToRGB(v1, v2, hsl.hue + (1.0f / 3)));
-                g = (int)(255 * HueToRGB(v1, v2, hsl.hue));
-                b = (int)(255 * HueToRGB(v1, v2, hsl.hue - (1.0f / 3)));
+                r = (int)(255 * HueToRGB(v1, v2, hsl.Hue + (1.0f / 3)));
+                g = (int)(255 * HueToRGB(v1, v2, hsl.Hue));
+                b = (int)(255 * HueToRGB(v1, v2, hsl.Hue - (1.0f / 3)));
             }
 
             return Color.FromArgb(0, r, g, b);

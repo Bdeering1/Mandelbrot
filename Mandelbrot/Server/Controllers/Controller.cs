@@ -19,7 +19,7 @@ public class Controller : ControllerBase
     [Route("colors")]
     public List<string> GetColors()
     {
-        var res = ColorGenerator.GetGradients(200, 0.7).Select(x => ColorGenerator.GetHexString(x)).ToList();
+        var res = ColorGenerator.GetGradients(200, 0.7).Select(x => ColorGenerator.GetHex(x)).ToList();
         return res;
     }
 }
