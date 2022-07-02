@@ -1,7 +1,6 @@
 ﻿@page "/"
 
 @using Mandelbrot.Client.Shared.Prototype
-@using System.Drawing
 
 @if (Colors is null)
 {
@@ -10,7 +9,7 @@
 else
 {
     <div style="display: flex; justify-content: center; align-items: center;">
-        <Canvas Width="8" PointSize="30" Colors="Colors" />
+        <Canvas Width="30" PointSize="40" Colors="Colors" />
     </div>
 }
 

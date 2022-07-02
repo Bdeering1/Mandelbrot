@@ -1,6 +1,4 @@
-﻿using System;
-using System.Drawing;
-using System.Net.Http.Json;
+﻿using System.Net.Http.Json;
 
 namespace Mandelbrot.Client
 {

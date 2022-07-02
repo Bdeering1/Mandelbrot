@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.ResponseCompression;
-
-namespace Mandelbrot;
+﻿namespace Mandelbrot;
 
 public class Program
 {

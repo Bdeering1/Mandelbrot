@@ -3,7 +3,7 @@ using Mandelbrot.Shared.Models;
 
 namespace Mandelbrot.Core
 {
-    public class GenerateColors
+    public class ColorGenerator
     {
         /// <summary>
         /// Creates a list of colors in a gradient from hue 0-360
@@ -46,6 +46,9 @@ namespace Mandelbrot.Core
             
             return asColors;
         }
+
+        public static string GetHexString(Color c) =>
+        $"#{c.R:X2}{c.G:X2}{c.B:X2}";
 
         private static Color FromHsl(HSL hsl)
         {
