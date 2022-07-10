@@ -6,7 +6,7 @@ namespace Mandelbrot.Core
     public class ColorGenerator
     {
         /// <summary>
-        /// Creates a list of colors in a gradient from hue 0-360
+        /// Creates a list of colors in a gradient from hue 0-360, with lightness steps
         /// </summary>
         /// <param name="maxIter">Number of colors in the gradient</param>
         /// <param name="ratio">Ratio of Hue/Lightness steps</param>
@@ -44,6 +44,35 @@ namespace Mandelbrot.Core
             //makes a new list as color objects from the sorted list
             var asColors = sorted.ConvertAll(new Converter<Hsl, Color>(FromHsl));
             
+            return asColors;
+        }
+
+        /// <summary>
+        /// Creates a list of colors in a gradient from hue 0-360
+        /// </summary>
+        /// <param name="maxIter"></param>
+        /// <returns>List of colors</returns>
+        public static List<Color> GetGradients(int maxIter)
+        {
+            var colors = new List<Hsl>();
+
+            double step = 1.0 / maxIter;
+            double s = 1.0;
+            double l = 0.5;
+
+            for (int i = 0; i < maxIter; i++)
+            {
+                double h = step * (i + 1);
+
+                colors.Add(new Hsl(h, s, l));
+            }
+            
+            //sort the list of colors
+            var sorted = colors.OrderBy(o => o.Hue).ToList();
+
+            //makes a new list as color objects from the sorted list
+            var asColors = sorted.ConvertAll(new Converter<Hsl, Color>(FromHsl));
+
             return asColors;
         }
 
