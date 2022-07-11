@@ -69,10 +69,10 @@ namespace Mandelbrot.Core
             
             //sort the list of colors
             var sorted = colors.OrderBy(o => o.Hue).ToList();
+            sorted[sorted.Count - 1] = new Hsl(1.0, 1.0, 0.0);
 
             //makes a new list as color objects from the sorted list
             var asColors = sorted.ConvertAll(new Converter<Hsl, Color>(FromHsl));
-
             return asColors;
         }
 

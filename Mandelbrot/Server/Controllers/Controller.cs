@@ -1,5 +1,6 @@
 ﻿using System.Drawing;
 using Mandelbrot.Core;
+using Mandelbrot.Server.Core;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Mandelbrot.Server.Controllers;
@@ -19,8 +20,9 @@ public class Controller : ControllerBase
     [Route("colors")]
     public List<string> GetColors()
     {
-        var res = ColorGenerator.GetGradients(2000).Select(x => ColorGenerator.GetHex(x)).ToList();
-        return res;
+        List<Color> res = ColorGenerator.GetGradients(200);
+        var set = GenerateSet.MandelBrot(res, 500, 500).Select(x => ColorGenerator.GetHex(x)).ToList();
+        return set;
     }
 }
 
