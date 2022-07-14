@@ -1,28 +1,41 @@
 ﻿@page "/"
 
 @using Mandelbrot.Client.Shared.Prototype
+@using SkiaSharp
+@using SkiaSharp.Views.Blazor
 
-@if (Colors is null)
+@if (bitmap is null)
 {
     <p>No data...</p>
 }
 else
 {
     <div style="display: flex; justify-content: center; align-items: center;">
-        <Canvas Width="500" PointSize="2" Colors="Colors" />
+        @*display the stuff*@
     </div>
 }
+
+@*<SKGLView OnPaintSurface="OnPaintSurface" />*@
 
 
 @code {
     [Inject]
     public ApiClient client { get; set; }
 
-    private List<string> Colors { get; set; }
+    private SKBitmap bitmap;
 
     protected override async Task OnInitializedAsync()
     {
-        Colors = await client.GetColors();
-        await base.OnInitializedAsync();
+        bitmap = await client.GetImage();
+        Console.WriteLine(bitmap);
+        Console.WriteLine(bitmap?.ByteCount);
+    }
+
+    private void OnPaintSurface(SKPaintGLSurfaceEventArgs args)
+    {
+        if (bitmap is null) return;
+        var canvas = args.Surface.Canvas;
+        canvas.Clear(SKColors.White);
+        canvas.DrawBitmap(bitmap, 0, 0);
     }
 }

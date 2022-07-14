@@ -2,6 +2,7 @@
 using Mandelbrot.Core;
 using Mandelbrot.Server.Core;
 using Microsoft.AspNetCore.Mvc;
+using SkiaSharp;
 
 namespace Mandelbrot.Server.Controllers;
 
@@ -16,12 +17,21 @@ public class Controller : ControllerBase
         this.logger = logger;
     }
 
+    //[HttpGet]
+    //[Route("colors")]
+    //public List<string> GetColors()
+    //{
+    //    List<Color> res = ColorGenerator.GetGradients(200);
+    //    var set = GenerateSet.MandelBrot(res, 500, 500).Select(x => ColorGenerator.GetHex(x)).ToList();
+    //    return set;
+    //}
+
     [HttpGet]
-    [Route("colors")]
-    public List<string> GetColors()
+    [Route("image")]
+    public SKBitmap GetImage()
     {
-        List<Color> res = ColorGenerator.GetGradients(200);
-        var set = GenerateSet.MandelBrot(res, 500, 500).Select(x => ColorGenerator.GetHex(x)).ToList();
+        List<Color> colors = ColorGenerator.GetGradients(200);
+        SKBitmap set = GenerateSet.GetBitmap(colors, 50, 50);
         return set;
     }
 }

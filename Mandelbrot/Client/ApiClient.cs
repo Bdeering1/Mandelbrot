@@ -1,4 +1,5 @@
-﻿using System.Net.Http.Json;
+﻿using SkiaSharp;
+using System.Net.Http.Json;
 
 namespace Mandelbrot.Client
 {
@@ -15,6 +16,20 @@ namespace Mandelbrot.Client
         {
             var res = await http.GetFromJsonAsync<List<string>>("colors");
             return res;
+        }
+
+        public async Task<SKBitmap> GetImage()
+        {
+            SKBitmap bitmap;
+            using (Stream stream = await http.GetStreamAsync("image"))
+            using (MemoryStream memStream = new MemoryStream())
+            {
+                await stream.CopyToAsync(memStream);
+                memStream.Seek(0, SeekOrigin.Begin);
+
+                bitmap = SKBitmap.Decode(memStream);
+            };
+            return bitmap;
         }
     }
 }
