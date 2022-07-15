@@ -1,24 +1,21 @@
-﻿using Microsoft.AspNetCore.SignalR;
+﻿using System.Drawing;
+using Mandelbrot.Core;
+using Mandelbrot.Server.Core;
+using Microsoft.AspNetCore.SignalR;
 using SkiaSharp;
 
 namespace Mandelbrot.Server.Hubs
 {
     public class UpdateHub : Hub
     {
-        public async Task SendMessage(string user, string message)
+        public async Task SendRequest()
         {
-            await Clients.All.SendAsync("ReceiveMessage", user, message);
-        }
+            Console.WriteLine("Request received");
+            List<Color> colors = ColorGenerator.GetGradients(200);
+            SKBitmap set = GenerateSet.GetBitmap(colors, 50, 50);
 
-        public async Task SendBitmap(SKBitmap bitmap)
-        {
-            await Clients.All.SendAsync("ReceiveBitmap", bitmap);
-        }
-
-        public async Task SendRequest(bool dummy)
-        {
-            Console.WriteLine("Request received at hub");
-            await Clients.All.SendAsync("ReceiveRequest", dummy);
+            await Clients.All.SendAsync("ReceiveBitmap", set);
+            Console.WriteLine("Bitmap sent");
         }
     }
 }

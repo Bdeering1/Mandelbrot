@@ -1,6 +1,8 @@
-﻿using Mandelbrot.Server.Core;
+﻿using System.Text.Json.Serialization;
+using Mandelbrot.Server.Core;
 using Mandelbrot.Server.Hubs;
 using Microsoft.AspNetCore.ResponseCompression;
+using Microsoft.AspNetCore.SignalR;
 
 namespace Mandelbrot;
 
@@ -12,20 +14,26 @@ public class Program
 
         // Add services to the container.
 
-        builder.Services.AddControllersWithViews();
+        builder.Services.AddControllersWithViews().AddJsonOptions(options =>
+        {
+            options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve;
+            options.JsonSerializerOptions.PropertyNamingPolicy = null;
+        });
         builder.Services.AddRazorPages();
 
-        builder.Services.AddSignalR();
-        builder.Services.AddResponseCompression(opts =>
+        builder.Services.AddSignalR().AddJsonProtocol(options =>
         {
-            opts.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(new[] { "application/octet-stream" });
+            options.PayloadSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve;
+            options.PayloadSerializerOptions.PropertyNamingPolicy = null;
         });
-
-        builder.Services.AddSingleton<ClientDelegator>();
+        //builder.Services.AddResponseCompression(opts =>
+        //{
+        //    opts.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(new[] { "application/octet-stream" });
+        //});
 
         var app = builder.Build();
 
-        app.UseResponseCompression();
+        //app.UseResponseCompression();
 
         // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())
@@ -50,9 +58,7 @@ public class Program
         app.MapControllers();
         app.MapHub<UpdateHub>("/hub");
         app.MapFallbackToFile("index.html");
-
-        app.Services.GetService<ClientDelegator>().Initialize();
-
+        
         app.Run();
 
     }

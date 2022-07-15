@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Components;
+﻿using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.SignalR.Client;
 using SkiaSharp;
 
@@ -15,6 +16,11 @@ namespace Mandelbrot.Client.ApiClients
             connection = new HubConnectionBuilder()
                 .WithUrl(navigationManager.ToAbsoluteUri("/hub"))
                 .WithAutomaticReconnect()
+                .AddJsonProtocol(options =>
+                {
+                    options.PayloadSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve;
+                    options.PayloadSerializerOptions.PropertyNamingPolicy = null;
+                })
                 .Build();
 
             connection.On<SKBitmap>("ReceiveBitmap", BitmapReceived);
@@ -32,7 +38,7 @@ namespace Mandelbrot.Client.ApiClients
 
         public async Task SendRequest()
         {
-            await connection.SendAsync("SendRequest", true); // attach zoom/pos values heree
+            await connection.SendAsync("SendRequest"); // attach zoom/pos values heree
         }
 
         private void BitmapReceived(SKBitmap bitmap)

@@ -22,7 +22,7 @@ public class Controller : ControllerBase
     //public List<string> GetColors()
     //{
     //    List<Color> res = ColorGenerator.GetGradients(200);
-    //    var set = GenerateSet.MandelBrot(res, 500, 500).Select(x => ColorGenerator.GetHex(x)).ToList();
+    //    var set = GenerateSet.GetColorList(res, 500, 500).Select(x => ColorGenerator.GetHex(x)).ToList();
     //    return set;
     //}
 
