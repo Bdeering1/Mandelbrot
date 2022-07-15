@@ -1,4 +1,8 @@
-﻿namespace Mandelbrot;
+﻿using Mandelbrot.Server.Core;
+using Mandelbrot.Server.Hubs;
+using Microsoft.AspNetCore.ResponseCompression;
+
+namespace Mandelbrot;
 
 public class Program
 {
@@ -11,7 +15,17 @@ public class Program
         builder.Services.AddControllersWithViews();
         builder.Services.AddRazorPages();
 
+        builder.Services.AddSignalR();
+        builder.Services.AddResponseCompression(opts =>
+        {
+            opts.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(new[] { "application/octet-stream" });
+        });
+
+        builder.Services.AddSingleton<ClientDelegator>();
+
         var app = builder.Build();
+
+        app.UseResponseCompression();
 
         // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())
@@ -32,12 +46,15 @@ public class Program
 
         app.UseRouting();
 
-
         app.MapRazorPages();
         app.MapControllers();
+        app.MapHub<UpdateHub>("/hub");
         app.MapFallbackToFile("index.html");
 
+        app.Services.GetService<ClientDelegator>().Initialize();
+
         app.Run();
+
     }
 }
 

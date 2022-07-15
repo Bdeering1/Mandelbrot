@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Components.Web;
+﻿using Mandelbrot.Client.ApiClients;
+using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 
 namespace Mandelbrot.Client;
@@ -14,6 +15,7 @@ public class Program
         builder.Services.AddSingleton(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 
         builder.Services.AddSingleton<ApiClient>();
+        builder.Services.AddSingleton<UpdateClient>();
 
         await builder.Build().RunAsync();
     }

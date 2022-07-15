@@ -1,7 +1,7 @@
 ﻿using SkiaSharp;
 using System.Net.Http.Json;
 
-namespace Mandelbrot.Client
+namespace Mandelbrot.Client.ApiClients
 {
     public class ApiClient
     {

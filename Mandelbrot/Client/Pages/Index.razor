@@ -1,8 +1,8 @@
 ﻿@page "/"
 
-@using Mandelbrot.Client.Shared.Prototype
 @using SkiaSharp
 @using SkiaSharp.Views.Blazor
+@using Mandelbrot.Client.ApiClients;
 
 @if (bitmap is null)
 {
@@ -11,24 +11,28 @@
 else
 {
     <div style="display: flex; justify-content: center; align-items: center;">
-        @*display the stuff*@
+        <SKGLView OnPaintSurface="OnPaintSurface" />
     </div>
 }
-
-@*<SKGLView OnPaintSurface="OnPaintSurface" />*@
 
 
 @code {
     [Inject]
-    public ApiClient client { get; set; }
+    public UpdateClient client { get; set; }
 
-    private SKBitmap bitmap;
+    private SKBitmap? bitmap;
 
     protected override async Task OnInitializedAsync()
     {
-        bitmap = await client.GetImage();
-        Console.WriteLine(bitmap);
-        Console.WriteLine(bitmap?.ByteCount);
+        client.OnBitmapReceived += (bm) =>
+        {
+            Console.WriteLine("Bitmap received");
+            bitmap = bm;
+            StateHasChanged();
+        };
+
+        await client.SendRequest();
+        Console.WriteLine("Request sent");
     }
 
     private void OnPaintSurface(SKPaintGLSurfaceEventArgs args)
