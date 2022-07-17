@@ -12,7 +12,7 @@ namespace Mandelbrot.Server.Hubs
         {
             Console.WriteLine("Request received");
             List<Color> colors = ColorGenerator.GetGradients(200);
-            SKBitmap set = GenerateSet.GetBitmap(colors, 50, 50);
+            var set = GenerateSet.GetBitmap(colors, 50, 50).Encode(SKEncodedImageFormat.Webp, 100).AsStream();
 
             await Clients.All.SendAsync("ReceiveBitmap", set);
             Console.WriteLine("Bitmap sent");

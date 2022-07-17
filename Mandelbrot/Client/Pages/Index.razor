@@ -19,14 +19,14 @@ else
 @code {
     [Inject] UpdateClient client { get; set; }
 
-    private SKBitmap? bitmap;
+    private SKBitmap bitmap;
 
     protected override async Task OnInitializedAsync()
     {
         client.OnBitmapReceived += (bm) =>
         {
             Console.WriteLine("Bitmap received");
-            bitmap = bm;
+            bitmap = SKBitmap.Decode(bm);
             StateHasChanged();
         };
 

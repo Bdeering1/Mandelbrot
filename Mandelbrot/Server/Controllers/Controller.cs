@@ -26,13 +26,13 @@ public class Controller : ControllerBase
     //    return set;
     //}
 
-    [HttpGet]
-    [Route("image")]
-    public SKBitmap GetImage()
-    {
-        List<Color> colors = ColorGenerator.GetGradients(200);
-        SKBitmap set = GenerateSet.GetBitmap(colors, 50, 50);
-        return set;
-    }
+    //[HttpGet]
+    //[Route("image")]
+    //public string GetImage()
+    //{
+    //    List<Color> colors = ColorGenerator.GetGradients(200);
+    //    var set = GenerateSet.GetBitmap(colors, 50, 50);
+    //    return set;
+    //}
 }
 
