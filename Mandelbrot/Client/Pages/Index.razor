@@ -11,7 +11,8 @@
 else
 {
     <div style="display: flex; justify-content: center; align-items: center;">
-        <SKGLView OnPaintSurface="OnPaintSurface" />
+        @*<SKGLView OnPaintSurface="OnPaintSurface" />*@
+        <img src=@($"data:image/jpeg;base64,{bitmap}")/>
     </div>
 }
 
@@ -19,26 +20,19 @@ else
 @code {
     [Inject] UpdateClient client { get; set; }
 
-    private SKBitmap bitmap;
+    private string bitmap = null;
 
     protected override async Task OnInitializedAsync()
     {
         client.OnBitmapReceived += (bm) =>
         {
             Console.WriteLine("Bitmap received");
-            bitmap = SKBitmap.Decode(bm);
+            bitmap = bm;
+            Console.WriteLine(bm);
             StateHasChanged();
         };
 
         await client.SendRequest();
         Console.WriteLine("Request sent");
-    }
-
-    private void OnPaintSurface(SKPaintGLSurfaceEventArgs args)
-    {
-        if (bitmap is null) return;
-        var canvas = args.Surface.Canvas;
-        canvas.Clear(SKColors.White);
-        canvas.DrawBitmap(bitmap, 0, 0);
     }
 }

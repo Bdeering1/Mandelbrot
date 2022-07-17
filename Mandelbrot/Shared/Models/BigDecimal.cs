@@ -10,7 +10,7 @@ namespace Mandelbrot.Shared.Models
     /// </summary>
     public class BigDecimal
     {
-        public static int Precision { get; set; } = 100;
+        public static int Precision { get; set; } = 25;
 
         public BigInteger Significand { get; private set; }
         public int Exponent { get; private set; }

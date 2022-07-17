@@ -9,7 +9,7 @@ namespace Mandelbrot.Client.ApiClients
     {
         private HubConnection connection { get; }
 
-        public event Action<Stream> OnBitmapReceived;
+        public event Action<string> OnBitmapReceived;
 
         public UpdateClient(NavigationManager navigationManager)
         {
@@ -23,7 +23,7 @@ namespace Mandelbrot.Client.ApiClients
                 })
                 .Build();
 
-            connection.On<Stream>("ReceiveBitmap", BitmapReceived);
+            connection.On<string>("ReceiveBitmap", BitmapReceived);
 
             connection.StartAsync();
         }
@@ -41,7 +41,7 @@ namespace Mandelbrot.Client.ApiClients
             await connection.SendAsync("SendRequest"); // attach zoom/pos values heree
         }
 
-        private void BitmapReceived(Stream bitmap)
+        private void BitmapReceived(string bitmap)
         {
             Console.WriteLine("Received in client");
             OnBitmapReceived?.Invoke(bitmap);

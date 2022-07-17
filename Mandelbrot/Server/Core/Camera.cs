@@ -18,7 +18,7 @@ namespace Mandelbrot.Server.Core
 
         public BigComplex TranslatePixel(int x, int y)
         {
-            BigComplex realCoords = PxToCoord(x, y, 50, 50);
+            BigComplex realCoords = PxToCoord(x, y, 500, 500);
             realCoords += pos;
             return realCoords;
         }
