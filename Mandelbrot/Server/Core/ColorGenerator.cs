@@ -56,14 +56,12 @@ namespace Mandelbrot.Core
         {
             var colors = new List<Hsl>();
 
-            double step = 1.0 / maxIter;
             double s = 1.0;
             double l = 0.5;
 
             for (int i = 0; i < maxIter; i++)
             {
-                double h = step * (i + 1);
-
+                double h = (double) i / maxIter;
                 colors.Add(new Hsl(h, s, l));
             }
             
