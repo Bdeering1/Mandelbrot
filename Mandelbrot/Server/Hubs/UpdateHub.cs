@@ -15,9 +15,9 @@ namespace Mandelbrot.Server.Hubs
 
             var s = new Stopwatch();
             s.Start();
-            var set = Convert.ToBase64String(SetGenerator.GetBitmap(colors, 701, 701).Encode(SKEncodedImageFormat.Png, 100).ToArray());
+            var set = Convert.ToBase64String(SetGenerator.GetBitmap(colors, 201, 201).Encode(SKEncodedImageFormat.Png, 100).ToArray());
             s.Stop();
-            Console.WriteLine($"{s.ElapsedMilliseconds} ms elapsed");
+            Console.WriteLine($"{s.ElapsedMilliseconds / 1000.0}s elapsed");
 
             await Clients.All.SendAsync("ReceiveBitmap", set);
         }

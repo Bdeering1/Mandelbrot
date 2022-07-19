@@ -8,17 +8,20 @@ namespace Mandelbrot.Server.Core
     {
         public static SKBitmap GetBitmap(List<Color> colors, int width, int height)
         {
-            var camera = new Camera(new BigComplex((BigDecimal)0, (BigDecimal)0.5), 2, width, height);
+            var camera = new Camera(new BigComplex((BigDecimal)0, (BigDecimal)(-1)), 4, width, height);
             var set = new SKBitmap(width, height, SKColorType.Rgba8888, SKAlphaType.Opaque);
+
             int reflectHeight = height;
+            var shouldReflect = camera.GetComplexY(0) > (BigDecimal)0 && camera.GetComplexY(height) < (BigDecimal)0;
 
             for (int y = 0; y < height; y++)
             {
-                if (camera.GetComplexY(y) < (BigDecimal)0)
+                if (shouldReflect && camera.GetComplexY(y) < (BigDecimal)0)
                 {
                     reflectHeight = y - 1;
                     Console.WriteLine($"Reflecting at: {reflectHeight}");
-                    break;
+                    y = reflectHeight * 2;
+                    shouldReflect = false;
                 }
 
                 for (int x = 0; x < width; x++)
@@ -39,6 +42,7 @@ namespace Mandelbrot.Server.Core
 
             for (int y = 1; y < height - reflectHeight; y++)
             {
+                if (y == height) break;
                 Console.WriteLine($"{reflectHeight + y} (reflected {reflectHeight - y})");
                 for (int x = 0; x < width; x++)
                 {
