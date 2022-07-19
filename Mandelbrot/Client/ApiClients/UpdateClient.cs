@@ -43,7 +43,6 @@ namespace Mandelbrot.Client.ApiClients
 
         private void BitmapReceived(string bitmap)
         {
-            Console.WriteLine("Received in client");
             OnBitmapReceived?.Invoke(bitmap);
         }
     }

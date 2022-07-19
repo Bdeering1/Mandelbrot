@@ -1,10 +1,8 @@
 ﻿@page "/"
 
-@using SkiaSharp
-@using SkiaSharp.Views.Blazor
 @using Mandelbrot.Client.ApiClients;
 
-@if (bitmap is null)
+@if (String.IsNullOrWhiteSpace(bitmap))
 {
     <p>No data...</p>
 }
@@ -20,19 +18,17 @@ else
 @code {
     [Inject] UpdateClient client { get; set; }
 
-    private string bitmap = null;
+    private string bitmap;
 
     protected override async Task OnInitializedAsync()
     {
         client.OnBitmapReceived += (bm) =>
         {
-            Console.WriteLine("Bitmap received");
             bitmap = bm;
-            Console.WriteLine(bm);
+            Console.WriteLine($"Bitmap string: {bitmap}");
             StateHasChanged();
         };
 
         await client.SendRequest();
-        Console.WriteLine("Request sent");
     }
 }

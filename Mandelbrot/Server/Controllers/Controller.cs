@@ -16,23 +16,5 @@ public class Controller : ControllerBase
     {
         this.logger = logger;
     }
-
-    //[HttpGet]
-    //[Route("colors")]
-    //public List<string> GetColors()
-    //{
-    //    List<Color> res = ColorGenerator.GetGradients(200);
-    //    var set = GenerateSet.GetColorList(res, 500, 500).Select(x => ColorGenerator.GetHex(x)).ToList();
-    //    return set;
-    //}
-
-    //[HttpGet]
-    //[Route("image")]
-    //public string GetImage()
-    //{
-    //    List<Color> colors = ColorGenerator.GetGradients(200);
-    //    var set = GenerateSet.GetBitmap(colors, 50, 50);
-    //    return set;
-    //}
 }
 

@@ -11,17 +11,15 @@ namespace Mandelbrot.Server.Hubs
     {
         public async Task SendRequest()
         {
-            Console.WriteLine("Request received");
             List<Color> colors = ColorGenerator.GetGradients(200);
 
-            Stopwatch s = new Stopwatch();
+            var s = new Stopwatch();
             s.Start();
-            var set = Convert.ToBase64String(GenerateSet.GetBitmap(colors, 500, 500).Encode(SKEncodedImageFormat.Png, 100).ToArray());
+            var set = Convert.ToBase64String(SetGenerator.GetBitmap(colors, 500, 500).Encode(SKEncodedImageFormat.Png, 100).ToArray());
             s.Stop();
-            Console.WriteLine(s.ElapsedMilliseconds);
+            Console.WriteLine($"{s.ElapsedMilliseconds} ms elapsed");
 
             await Clients.All.SendAsync("ReceiveBitmap", set);
-            Console.WriteLine("Bitmap sent");
         }
     }
 }
