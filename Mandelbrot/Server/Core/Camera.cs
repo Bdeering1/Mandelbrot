@@ -4,7 +4,7 @@ namespace Mandelbrot.Server.Core
 {
     public class Camera
     {
-        private const int DOMAIN = 4;
+        private const int DOMAIN = 6;
         private const int RANGE = 4;
 
         private int domainPx { get; }
