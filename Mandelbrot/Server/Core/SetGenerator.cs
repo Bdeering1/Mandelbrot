@@ -8,27 +8,42 @@ namespace Mandelbrot.Server.Core
     {
         public static SKBitmap GetBitmap(List<Color> colors, int width, int height)
         {
-            var camera = new Camera(new BigComplex((BigDecimal)0, (BigDecimal)0), 1);
-
+            var camera = new Camera(new BigComplex((BigDecimal)0, (BigDecimal)0.5), 2, width, height);
             var set = new SKBitmap(width, height, SKColorType.Rgba8888, SKAlphaType.Opaque);
-            for (int y = 0; y < height / 2; y++)
+            int reflectHeight = height;
+
+            for (int y = 0; y < height; y++)
             {
+                if (camera.GetComplexY(y) < (BigDecimal)0)
+                {
+                    reflectHeight = y - 1;
+                    Console.WriteLine($"Reflecting at: {reflectHeight}");
+                    break;
+                }
+
                 for (int x = 0; x < width; x++)
                 {
-                    BigComplex complexPos = camera.TranslatePixel(x + 1, y + 1);
+                    var complexPos = camera.GetComplexPos(x, y);
 
                     if ((complexPos.i < (BigDecimal)0.45 && complexPos.i > (BigDecimal)(-0.14) && complexPos.r < (BigDecimal)0.2 && complexPos.r > (BigDecimal)(-0.564)) ||
                         (complexPos.i < (BigDecimal)0.18 && complexPos.i > (BigDecimal)(-0.064) && complexPos.r < (BigDecimal)(-0.84) && complexPos.r > (BigDecimal)(-1.16)))
                     {
                         set.SetPixel(x, y, new SKColor(colors[^1].R, colors[^1].G, colors[^1].B));
-                        set.SetPixel(x, height - y - 1, new SKColor(colors[^1].R, colors[^1].G, colors[^1].B));
                         continue;
                     };
                     int escTime = CalcEscapeTime(complexPos);
                     set.SetPixel(x, y, new SKColor(colors[escTime - 1].R, colors[escTime - 1].G, colors[escTime - 1].B));
-                    set.SetPixel(x, height - y - 1, new SKColor(colors[escTime - 1].R, colors[escTime - 1].G, colors[escTime - 1].B));
                 }
                 Console.WriteLine(y);
+            }
+
+            for (int y = 1; y < height - reflectHeight; y++)
+            {
+                Console.WriteLine($"{reflectHeight + y} (reflected {reflectHeight - y})");
+                for (int x = 0; x < width; x++)
+                {
+                    set.SetPixel(x, reflectHeight + y, set.GetPixel(x, reflectHeight - y));
+                }
             }
 
             return set;
@@ -40,7 +55,7 @@ namespace Mandelbrot.Server.Core
             var current = new BigComplex(new BigDecimal(0), new BigDecimal(0));
 
             int iter = 0;
-            int maxIter = 200;
+            int maxIter = 100;
 
             while (current.r * current.r + current.i * current.i <= new BigDecimal(4) && iter < maxIter)
             {
