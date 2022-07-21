@@ -74,6 +74,29 @@ namespace Mandelbrot.Core
             return asColors;
         }
 
+        /// <summary>
+        /// Creates a list of colors in a gradient from hue 0-360
+        /// </summary>
+        /// <param name="maxIter"></param>
+        /// <returns>List of colors</returns>
+        public static List<Color> GetBernsteinGradients(int maxIter)
+        {
+            var colors = new List<Color>();
+
+            for (int i = 0; i < maxIter; i++)
+            {
+                double t = (double)i / maxIter;
+                colors.Add(Color.FromArgb(
+                    1,
+                    (int)(9 * (1 - t) * Math.Pow(t, 3) * 255),
+                    (int)(15 * Math.Pow(1 - t, 2) * Math.Pow(t, 2) * 255),
+                    (int)(8.5 * Math.Pow(1 - t, 3) * t * 255)
+                    ));
+            }
+
+            return colors;
+        }
+
         public static string GetHex(Color c) =>
         $"#{c.R:X2}{c.G:X2}{c.B:X2}";
 
