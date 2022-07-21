@@ -60,10 +60,15 @@ namespace Mandelbrot.Server.Core
             var constant = new BigComplex(pt.r, pt.i);
             var current = new BigComplex(new BigDecimal(0), new BigDecimal(0));
 
+            var rSq = (BigDecimal)0;
+            var iSq = (BigDecimal)0;
+
             int iter = 0;
-            while (current.r * current.r + current.i * current.i <= new BigDecimal(4) && iter < Config.MAX_ITERATIONS)
+            while (rSq + iSq <= new BigDecimal(4) && iter < Config.MAX_ITERATIONS)
             {
-                current = current * current + constant;
+                current = new BigComplex(rSq - iSq, current.r * current.i + current.i * current.r) + constant;
+                rSq = current.r * current.r;
+                iSq = current.i * current.i;
                 iter++;
             }
             return iter;
