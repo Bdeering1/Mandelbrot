@@ -9,7 +9,7 @@ namespace Mandelbrot.Server.Core
     {
         public static SKBitmap GetBitmap(int width, int height, List<Color> colors)
         {
-            var camera = new Camera(new BigComplex((BigDecimal)0, (BigDecimal)(-0.5)), 2, width, height);
+            var camera = new Camera(new BigComplex((BigDecimal)0, (BigDecimal)0), 2, width, height);
             var set = new SKBitmap(width, height, SKColorType.Rgba8888, SKAlphaType.Opaque);
 
             int reflectHeight = height;
