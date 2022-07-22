@@ -9,7 +9,7 @@ namespace Mandelbrot.Server.Core
     {
         public static SKBitmap GetBitmap(int width, int height, List<Color> colors)
         {
-            var camera = new Camera(new BigComplex((BigDecimal)0, (BigDecimal)0), 2, width, height);
+            var camera = new Camera(new BigComplex((BigDecimal)0, (BigDecimal)(-0.5)), 2, width, height);
             var set = new SKBitmap(width, height, SKColorType.Rgba8888, SKAlphaType.Opaque);
 
             int reflectHeight = height;
@@ -25,7 +25,7 @@ namespace Mandelbrot.Server.Core
                     shouldReflect = false;
                     continue;
                 }
-
+                 
                 for (int x = 0; x < width; x++)
                 {
                     var complexPos = camera.GetComplexPos(x, y);
@@ -44,7 +44,7 @@ namespace Mandelbrot.Server.Core
 
             for (int y = 1; y < height - reflectHeight; y++)
             {
-                if (y == height) break;
+                if (y == height || reflectHeight - y < 0) break;
                 Console.WriteLine($"{reflectHeight + y} (reflected {reflectHeight - y})");
                 for (int x = 0; x < width; x++)
                 {
@@ -60,15 +60,15 @@ namespace Mandelbrot.Server.Core
             var constant = new BigComplex(pt.r, pt.i);
             var current = new BigComplex(new BigDecimal(0), new BigDecimal(0));
 
-            var rSq = (BigDecimal)0;
-            var iSq = (BigDecimal)0;
+            var rSquared = (BigDecimal)0;
+            var iSquared = (BigDecimal)0;
 
             int iter = 0;
-            while (rSq + iSq <= new BigDecimal(4) && iter < Config.MAX_ITERATIONS)
+            while (rSquared + iSquared <= new BigDecimal(4) && iter < Config.MAX_ITERATIONS)
             {
-                current = new BigComplex(rSq - iSq, current.r * current.i + current.i * current.r) + constant;
-                rSq = current.r * current.r;
-                iSq = current.i * current.i;
+                current = new BigComplex(rSquared - iSquared, current.r * current.i + current.i * current.r) + constant;
+                rSquared = current.r * current.r;
+                iSquared = current.i * current.i;
                 iter++;
             }
             return iter;

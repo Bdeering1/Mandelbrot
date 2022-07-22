@@ -11,11 +11,11 @@ namespace Mandelbrot.Server.Hubs
     {
         public async Task SendRequest()
         {
-            var colors = ColorGenerator.GetGradients(Config.MAX_ITERATIONS);
+            var colors = ColorGenerator.GetBernsteinGradients(Config.MAX_ITERATIONS);
 
             var s = new Stopwatch();
             s.Start();
-            var set = Convert.ToBase64String(SetGenerator.GetBitmap(600, 400, colors).Encode(SKEncodedImageFormat.Png, 100).ToArray());
+            var set = Convert.ToBase64String(SetGenerator.GetBitmap(1400, 800, colors).Encode(SKEncodedImageFormat.Png, 100).ToArray());
             s.Stop();
             Console.WriteLine($"{s.ElapsedMilliseconds / 1000.0}s elapsed");
 
