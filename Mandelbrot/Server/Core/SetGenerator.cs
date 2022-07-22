@@ -9,7 +9,7 @@ namespace Mandelbrot.Server.Core
     {
         public static SKBitmap GetBitmap(int width, int height, List<Color> colors)
         {
-            var camera = new Camera(new BigComplex((BigDecimal)0, (BigDecimal)0), 2, width, height);
+            var camera = new Camera(new BigComplex((BigDecimal)0, (BigDecimal)0), 1, width, height);
             var set = new SKBitmap(width, height, SKColorType.Rgba8888, SKAlphaType.Opaque);
 
             int reflectHeight = height;
@@ -30,12 +30,11 @@ namespace Mandelbrot.Server.Core
                 {
                     var complexPos = camera.GetComplexPos(x, y);
 
-                    if ((complexPos.i < (BigDecimal)0.45 && complexPos.i > (BigDecimal)(-0.14) && complexPos.r < (BigDecimal)0.2 && complexPos.r > (BigDecimal)(-0.564)) ||
-                        (complexPos.i < (BigDecimal)0.18 && complexPos.i > (BigDecimal)(-0.064) && complexPos.r < (BigDecimal)(-0.84) && complexPos.r > (BigDecimal)(-1.16)))
+                    if(checkShapes(complexPos))
                     {
-                        set.SetPixel(x, y, new SKColor(colors[^1].R, colors[^1].G, colors[^1].B));
+                        set.SetPixel(x, y, new SKColor(0, 0, 0));
                         continue;
-                    };
+                    }
                     int escTime = CalcEscapeTime(complexPos);
                     set.SetPixel(x, y, new SKColor(colors[escTime - 1].R, colors[escTime - 1].G, colors[escTime - 1].B));
                 }
@@ -53,6 +52,25 @@ namespace Mandelbrot.Server.Core
             }
 
             return set;
+        }
+
+        private static bool checkShapes(BigComplex pos)
+        {
+            //Cardiod and bulb checking (can be simplified to 1 if statement, currently using two for separating colors
+            BigDecimal iSq = pos.i * pos.i;
+            BigDecimal a = (pos.r - (BigDecimal)0.25);
+            BigDecimal q = a * a + iSq;
+            //cardioid check
+            if (q * (q + a) < iSq * (BigDecimal)0.25)
+            {
+                return true;
+            }
+            //bulb check
+            if (((pos.r * pos.r) + ((BigDecimal)2 * pos.r) + (BigDecimal)1 + iSq < (BigDecimal)0.0625))
+            {
+                return true;
+            }
+            return false;
         }
 
         public static int CalcEscapeTime(BigComplex pt)
