@@ -1,4 +1,5 @@
 ﻿using System.Drawing;
+using System.Runtime.InteropServices;
 using Mandelbrot.Shared.Configuration;
 using Mandelbrot.Shared.Models;
 using SkiaSharp;
@@ -10,7 +11,10 @@ namespace Mandelbrot.Server.Core
         public static SKBitmap GetBitmap(int width, int height, List<Color> colors)
         {
             var camera = new Camera(new BigComplex((BigDecimal)0, (BigDecimal)0), 1, width, height);
-            var set = new SKBitmap(width, height, SKColorType.Rgba8888, SKAlphaType.Opaque);
+
+            var imgInfo = new SKImageInfo(width, height, SKColorType.Rgba8888, SKAlphaType.Opaque);
+            var set = new SKBitmap(imgInfo);
+            var setBytes = new uint[width * height];
 
             int reflectHeight = height;
             var shouldReflect = camera.GetComplexY(0) > (BigDecimal)0 && camera.GetComplexY(height) < (BigDecimal)0;
@@ -25,18 +29,20 @@ namespace Mandelbrot.Server.Core
                     shouldReflect = false;
                     continue;
                 }
-                 
                 for (int x = 0; x < width; x++)
                 {
                     var complexPos = camera.GetComplexPos(x, y);
 
-                    if(checkShapes(complexPos))
+                    if (checkShapes(complexPos))
                     {
-                        set.SetPixel(x, y, new SKColor(0, 0, 0));
+                        setBytes[y * width + x] = 0;
+                        //set.SetPixel(x, y, new SKColor(0, 0, 0));
                         continue;
                     }
                     int escTime = CalcEscapeTime(complexPos);
-                    set.SetPixel(x, y, new SKColor(colors[escTime - 1].R, colors[escTime - 1].G, colors[escTime - 1].B));
+                    var c = colors[escTime - 1];
+                    setBytes[y * width + x] = (uint)((c.A << 24) | (c.B << 16) | (c.G << 8) | (c.R << 0));
+                    //set.SetPixel(x, y, new SKColor(colors[escTime - 1].R, colors[escTime - 1].G, colors[escTime - 1].B));
                 }
                 Console.WriteLine(y);
             }
@@ -47,9 +53,26 @@ namespace Mandelbrot.Server.Core
                 Console.WriteLine($"{reflectHeight + y} (reflected {reflectHeight - y})");
                 for (int x = 0; x < width; x++)
                 {
-                    set.SetPixel(x, reflectHeight + y, set.GetPixel(x, reflectHeight - y));
+                    Color c = Color.FromArgb((int)setBytes[(reflectHeight - y) * width + x]);
+                    setBytes[(reflectHeight + y) * width + x] = (uint)((c.A << 24) | (c.R << 16) | (c.G << 8) | (c.B << 0));
+                    //set.SetPixel(x, reflectHeight + y, set.GetPixel(x, reflectHeight - y));
                 }
             }
+
+            //copies byte array to the bitmap for easy handling/compression
+            var gcHandle = GCHandle.Alloc(setBytes, GCHandleType.Pinned); //makes sure the byte array doesnt get moved in memory, so that the pointer can be used
+            set.InstallPixels(imgInfo, gcHandle.AddrOfPinnedObject(), imgInfo.RowBytes, delegate { gcHandle.Free(); }, null);
+
+            //draw lines to see centre of screen
+            //using (var bitmapCanvas = new SKCanvas(set))
+            //{
+            //    var paint = new SKPaint
+            //    {
+            //        Color = new SKColor(255, 255, 255)
+            //    };
+            //    bitmapCanvas.DrawLine(new SKPoint(0, height / 2), new SKPoint(width, height / 2), paint);
+            //    bitmapCanvas.DrawLine(new SKPoint(width / 2, 0), new SKPoint(width / 2, height), paint);
+            //}
 
             return set;
         }
