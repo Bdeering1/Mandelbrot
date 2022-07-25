@@ -33,16 +33,14 @@ namespace Mandelbrot.Server.Core
                 {
                     var complexPos = camera.GetComplexPos(x, y);
 
-                    if (checkShapes(complexPos))
+                    if (CheckShapes(complexPos))
                     {
                         setBytes[y * width + x] = 0;
-                        //set.SetPixel(x, y, new SKColor(0, 0, 0));
                         continue;
                     }
                     int escTime = CalcEscapeTime(complexPos);
                     var c = colors[escTime - 1];
                     setBytes[y * width + x] = (uint)((c.A << 24) | (c.B << 16) | (c.G << 8) | (c.R << 0));
-                    //set.SetPixel(x, y, new SKColor(colors[escTime - 1].R, colors[escTime - 1].G, colors[escTime - 1].B));
                 }
                 Console.WriteLine(y);
             }
@@ -59,7 +57,7 @@ namespace Mandelbrot.Server.Core
                 }
             }
 
-            //copies byte array to the bitmap for easy handling/compression
+            //copy byte array to the bitmap for easy handling/compression
             var gcHandle = GCHandle.Alloc(setBytes, GCHandleType.Pinned); //makes sure the byte array doesnt get moved in memory, so that the pointer can be used
             set.InstallPixels(imgInfo, gcHandle.AddrOfPinnedObject(), imgInfo.RowBytes, delegate { gcHandle.Free(); }, null);
 
@@ -77,26 +75,20 @@ namespace Mandelbrot.Server.Core
             return set;
         }
 
-        private static bool checkShapes(BigComplex pos)
+        private static bool CheckShapes(BigComplex pos)
         {
-            //Cardiod and bulb checking (can be simplified to 1 if statement, currently using two for separating colors
-            BigDecimal iSq = pos.i * pos.i;
-            BigDecimal a = (pos.r - (BigDecimal)0.25);
-            BigDecimal q = a * a + iSq;
-            //cardioid check
-            if (q * (q + a) < iSq * (BigDecimal)0.25)
-            {
-                return true;
-            }
-            //bulb check
-            if (((pos.r * pos.r) + ((BigDecimal)2 * pos.r) + (BigDecimal)1 + iSq < (BigDecimal)0.0625))
+            BigDecimal iSquared = pos.i * pos.i;
+            BigDecimal a = pos.r - (BigDecimal)0.25;
+            BigDecimal q = a * a + iSquared;
+            if (q * (q + a) < iSquared * (BigDecimal)0.25
+                || (pos.r * pos.r) + ((BigDecimal)2 * pos.r) + (BigDecimal)1 + iSquared < (BigDecimal)0.0625)
             {
                 return true;
             }
             return false;
         }
 
-        public static int CalcEscapeTime(BigComplex pt)
+        private static int CalcEscapeTime(BigComplex pt)
         {
             var constant = new BigComplex(pt.r, pt.i);
             var current = new BigComplex(new BigDecimal(0), new BigDecimal(0));
