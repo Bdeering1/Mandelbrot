@@ -12,11 +12,9 @@
   <ItemGroup>
     <None Remove="Models\" />
     <None Remove="Resources\" />
-    <None Remove="Configuration\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Models\" />
     <Folder Include="Resources\" />
-    <Folder Include="Configuration\" />
   </ItemGroup>
 </Project>

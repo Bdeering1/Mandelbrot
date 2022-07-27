@@ -20,8 +20,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Remove="Hubs\" />
+    <None Remove="Configuration\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Hubs\" />
+    <Folder Include="Configuration\" />
   </ItemGroup>
 </Project>

@@ -11,7 +11,7 @@ namespace Mandelbrot.Server.Core
     {
         private int width { get; } = Config.IMAGE_WIDTH;
         private int height { get; } = Config.IMAGE_HEIGHT;
-        private List<Color> colors { get; set; }
+        private List<Color> colors { get; set; } = Config.Colors;
 
         private Camera camera { get; }
         private uint[] set { get; set; }
@@ -23,7 +23,6 @@ namespace Mandelbrot.Server.Core
             camera.position = new(-1.625, 0);
             camera.zoom = 30;
 
-            colors = ColorGenerator.GetBernsteinGradients();
             set = new uint[width * height];
         }
 
