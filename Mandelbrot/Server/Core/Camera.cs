@@ -10,7 +10,7 @@ namespace Mandelbrot.Server.Core
         private int imageSizeX { get; }
         private int imageSizeY { get; }
 
-        private BigComplex position { get; set; } = new((BigDecimal) 0, (BigDecimal) 0);
+        private BigComplex position { get; set; } = BigComplex.Origin;
         private double zoom { get; set; } = 0.0;
 
         public Camera(BigComplex position, double zoom, int imageSizeX, int imageSizeY)

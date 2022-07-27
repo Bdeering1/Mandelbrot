@@ -10,7 +10,7 @@ namespace Mandelbrot.Server.Core
     {
         public int Width { get; set; }
         public int Height { get; set; }
-        public List<Color> Colors { get; }
+        public List<Color> Colors { get; set; }
 
         private Camera camera { get; set; }
         private uint[] set { get; set; }
@@ -22,7 +22,7 @@ namespace Mandelbrot.Server.Core
             Colors = colors;
 
             set = new uint[width * height];
-            camera = new Camera(new BigComplex((BigDecimal)0, (BigDecimal)0), 1, Width, Height);
+            camera = new Camera(new(0, 0), 1, Width, Height);
         }
 
         public SKBitmap GetBitmap()
@@ -97,7 +97,7 @@ namespace Mandelbrot.Server.Core
         private static int CalcEscapeTime(BigComplex pt)
         {
             var constant = new BigComplex(pt.r, pt.i);
-            var current = new BigComplex(new BigDecimal(0), new BigDecimal(0));
+            var current = BigComplex.Origin;
 
             var rSquared = (BigDecimal)0;
             var iSquared = (BigDecimal)0;

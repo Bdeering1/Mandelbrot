@@ -82,11 +82,11 @@ namespace Mandelbrot.Shared.Models
 
         public static explicit operator BigDecimal(long num) => new(num);
 
-        public static explicit operator BigDecimal(decimal num) => new(num);
+        public static explicit operator BigDecimal(float num) => new((decimal)num);
 
         public static explicit operator BigDecimal(double num) => new((decimal)num);
 
-        public static explicit operator BigDecimal(float num) => new((decimal)num);
+        public static explicit operator BigDecimal(decimal num) => new(num);
 
 
         public static BigDecimal operator -(BigDecimal a)
