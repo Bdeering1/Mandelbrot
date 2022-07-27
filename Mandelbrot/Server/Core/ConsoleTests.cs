@@ -1,6 +1,4 @@
 ﻿using System.Drawing;
-using Mandelbrot.Core;
-using Mandelbrot.Shared.Models;
 
 namespace Mandelbrot.Server.Core
 {
@@ -12,24 +10,6 @@ namespace Mandelbrot.Server.Core
         //    var escapeTime = SetGenerator.CalcEscapeTime(point);
         //    Console.WriteLine($"Point: {point} Escape time: {escapeTime}");
         //}
-
-        public static void Colors()
-        {
-            var start = Color.Black;
-            var end = Color.FromArgb(255, 200, 100);
-
-            Console.WriteLine($"Interpolating from ({ColorString(start)}) to ({ColorString(end)}).");
-
-            foreach (var c in ColorGenerator.GetGradients(2000, 0.7))
-            {
-                Console.BackgroundColor = GetConsoleColor(c);
-                Console.Write("  ");
-                Console.ResetColor();
-                Console.WriteLine($"{ColorString(c)}");
-            }
-
-            Console.WriteLine("\nNote: console colors are very limited, so the color blocks are just a rough approximations.");
-        }
 
         public static ConsoleColor GetConsoleColor(Color c)
         {

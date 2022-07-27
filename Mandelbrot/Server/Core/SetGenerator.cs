@@ -1,6 +1,5 @@
 ﻿using System.Drawing;
 using System.Runtime.InteropServices;
-using Mandelbrot.Core;
 using Mandelbrot.Shared.Configuration;
 using Mandelbrot.Shared.Models;
 using SkiaSharp;
@@ -21,15 +20,13 @@ namespace Mandelbrot.Server.Core
             this.camera = camera;
 
             camera.position = new(-1.625, 0);
-            camera.zoom = 30;
+            camera.zoom = 35;
 
             set = new uint[width * height];
         }
 
-        public SKBitmap GetBitmap(List<Color>? colors = null)
+        public SKBitmap GetBitmap()
         {
-            if (colors is not null) this.colors = colors;
-
             var imgInfo = new SKImageInfo(width, height, SKColorType.Rgba8888, SKAlphaType.Opaque);
             var bitmap = new SKBitmap(new SKImageInfo(width, height, SKColorType.Rgba8888, SKAlphaType.Opaque));
 

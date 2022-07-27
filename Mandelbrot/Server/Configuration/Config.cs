@@ -12,9 +12,9 @@ namespace Mandelbrot.Shared.Configuration
         public static BigComplex DefaultCameraPosition { get; } = BigComplex.Origin;
         public static double DefaultCameraZoom { get; } = 1.0;
 
-        public static List<Color> Colors { get; } = ColorGenerator.GetBernsteinGradients();
-
         public static int MaxIterations { get; } = 100;
+
+        public static List<Color> Colors { get; } = ColorGenerator.GetBernsteinGradients();
     }
 }
 
