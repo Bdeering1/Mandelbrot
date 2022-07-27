@@ -1,9 +1,17 @@
-﻿using System;
+﻿using System.Drawing;
+using Mandelbrot.Shared.Models;
+
 namespace Mandelbrot.Shared.Configuration
 {
     public static class Config
     {
-        public const int MAX_ITERATIONS = 100;
+        public const int IMAGE_WIDTH = 1400;
+        public const int IMAGE_HEIGHT = 800;
+
+        public static BigComplex DefaultCameraPosition { get; } = BigComplex.Origin;
+        public static double DefaultCameraZoom { get; } = 1.0;
+
+        public static int MaxIterations { get; } = 50;
     }
 }
 

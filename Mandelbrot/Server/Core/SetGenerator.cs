@@ -1,5 +1,6 @@
 ﻿using System.Drawing;
 using System.Runtime.InteropServices;
+using Mandelbrot.Core;
 using Mandelbrot.Shared.Configuration;
 using Mandelbrot.Shared.Models;
 using SkiaSharp;
@@ -8,32 +9,35 @@ namespace Mandelbrot.Server.Core
 {
     public class SetGenerator
     {
-        public int Width { get; set; }
-        public int Height { get; set; }
-        public List<Color> Colors { get; set; }
+        private int width { get; } = Config.IMAGE_WIDTH;
+        private int height { get; } = Config.IMAGE_HEIGHT;
+        private List<Color> colors { get; set; }
 
-        private Camera camera { get; set; }
+        private Camera camera { get; }
         private uint[] set { get; set; }
 
-        public SetGenerator(int width, int height, List<Color> colors)
+        public SetGenerator(Camera camera)
         {
-            Width = width;
-            Height = height;
-            Colors = colors;
+            this.camera = camera;
 
+            camera.position = new(-1.625, 0);
+            camera.zoom = 30;
+
+            colors = ColorGenerator.GetBernsteinGradients();
             set = new uint[width * height];
-            camera = new Camera(new(0, 0), 1, Width, Height);
         }
 
-        public SKBitmap GetBitmap()
+        public SKBitmap GetBitmap(List<Color>? colors = null)
         {
-            var imgInfo = new SKImageInfo(Width, Height, SKColorType.Rgba8888, SKAlphaType.Opaque);
-            var bitmap = new SKBitmap(new SKImageInfo(Width, Height, SKColorType.Rgba8888, SKAlphaType.Opaque));
+            if (colors is not null) this.colors = colors;
 
-            int reflectHeight = Height;
-            var shouldReflect = camera.GetComplexY(0) > (BigDecimal)0 && camera.GetComplexY(Height) < (BigDecimal)0;
+            var imgInfo = new SKImageInfo(width, height, SKColorType.Rgba8888, SKAlphaType.Opaque);
+            var bitmap = new SKBitmap(new SKImageInfo(width, height, SKColorType.Rgba8888, SKAlphaType.Opaque));
 
-            for (int y = 0; y < Height; y++)
+            int reflectHeight = height;
+            var shouldReflect = camera.GetComplexY(0) > (BigDecimal)0 && camera.GetComplexY(height) < (BigDecimal)0;
+
+            for (int y = 0; y < height; y++)
             {
                 if (shouldReflect && camera.GetComplexY(y) < (BigDecimal)0)
                 {
@@ -43,20 +47,20 @@ namespace Mandelbrot.Server.Core
                     shouldReflect = false;
                     continue;
                 }
-                for (int x = 0; x < Width; x++)
+                for (int x = 0; x < width; x++)
                 {
                     ComputePixelValue(x, y);
                 }
                 Console.WriteLine(y);
             }
 
-            for (int y = 1; y < Height - reflectHeight; y++)
+            for (int y = 1; y < height - reflectHeight; y++)
             {
-                if (y == Height || reflectHeight - y < 0) break;
+                if (y == height || reflectHeight - y < 0) break;
                 Console.WriteLine($"{reflectHeight + y} (from {reflectHeight - y})");
-                for (int x = 0; x < Width; x++)
+                for (int x = 0; x < width; x++)
                 {
-                    set[(reflectHeight + y) * Width + x] = set[(reflectHeight - y) * Width + x];
+                    set[(reflectHeight + y) * width + x] = set[(reflectHeight - y) * width + x];
                 }
             }
 
@@ -75,12 +79,12 @@ namespace Mandelbrot.Server.Core
 
             if (CheckShapes(complexPos))
             {
-                set[y * Width + x] = 0;
+                set[y * width + x] = 0;
                 return;
             }
             int escTime = CalcEscapeTime(complexPos);
-            var c = Colors[escTime - 1];
-            set[y * Width + x] = (uint)((c.A << 24) | (c.B << 16) | (c.G << 8) | (c.R << 0));
+            var c = colors[escTime - 1];
+            set[y * width + x] = (uint)((c.A << 24) | (c.B << 16) | (c.G << 8) | (c.R << 0));
         }
 
         private void DrawCenterLines(SKBitmap set)
@@ -90,8 +94,8 @@ namespace Mandelbrot.Server.Core
             {
                 Color = new SKColor(255, 255, 255)
             };
-            bitmapCanvas.DrawLine(new SKPoint(0, Height / 2), new SKPoint(Width, Height / 2), paint);
-            bitmapCanvas.DrawLine(new SKPoint(Width / 2, 0), new SKPoint(Width / 2, Height), paint);
+            bitmapCanvas.DrawLine(new SKPoint(0, height / 2), new SKPoint(width, height / 2), paint);
+            bitmapCanvas.DrawLine(new SKPoint(width / 2, 0), new SKPoint(width / 2, height), paint);
         }
 
         private static int CalcEscapeTime(BigComplex pt)
@@ -103,7 +107,7 @@ namespace Mandelbrot.Server.Core
             var iSquared = (BigDecimal)0;
 
             int iter = 0;
-            while (rSquared + iSquared <= new BigDecimal(4) && iter < Config.MAX_ITERATIONS)
+            while (rSquared + iSquared <= new BigDecimal(4) && iter < Config.MaxIterations)
             {
                 current = new BigComplex(rSquared - iSquared, current.r * current.i + current.i * current.r) + constant;
                 rSquared = current.r * current.r;

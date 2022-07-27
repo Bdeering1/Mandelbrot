@@ -1,67 +1,25 @@
 ﻿using System.Drawing;
+using Mandelbrot.Shared.Configuration;
 using Mandelbrot.Shared.Models;
 
 namespace Mandelbrot.Core
 {
-    public class ColorGenerator
+    public static class ColorGenerator
     {
-        /// <summary>
-        /// Creates a list of colors in a gradient from hue 0-360, with lightness steps
-        /// </summary>
-        /// <param name="maxIter">Number of colors in the gradient</param>
-        /// <param name="ratio">Ratio of Hue/Lightness steps</param>
-        /// <returns>List of colors</returns>
-        public static List<Color> GetGradients(int maxIter, double ratio)
-        {
-            var colors = new List<Hsl>();
-
-            //Calculate how many iterations we need for each loop
-            double rangeLightness = Math.Sqrt((maxIter * (1 - ratio)) / ratio);
-            double rangeHue = maxIter / rangeLightness;
-
-            double stepL = 1.0 / (maxIter/(rangeLightness/1.5) * (1 - ratio));
-            double stepH = 1.0 / (rangeHue * ratio);
-
-            double s = 1.0;
-
-            //generate colors
-            for(int i = 0; i < rangeLightness; i++)
-            {
-                double l = stepL * (i + 1);
-                if (l > 1) l = 1;
-                if (l < 0) l = 0;
-
-                for(int j = 0; j < rangeHue; j++)
-                {
-                    double h = stepH * j;
-
-		            colors.Add(new Hsl(h, s, l));
-                }
-            }
-            //sort the list of colors
-            var sorted = colors.OrderBy(o => o.Hue).ThenBy(o => o.Lightness).ToList();
-
-            //makes a new list as color objects from the sorted list
-            var asColors = sorted.ConvertAll(new Converter<Hsl, Color>(FromHsl));
-            
-            return asColors;
-        }
-
         /// <summary>
         /// Creates a list of colors in a gradient from hue 0-360
         /// </summary>
-        /// <param name="maxIter"></param>
         /// <returns>List of colors</returns>
-        public static List<Color> GetGradients(int maxIter)
+        public static List<Color> GetGradients()
         {
             var colors = new List<Hsl>();
 
             double s = 1.0;
             double l = 0.5;
 
-            for (int i = 0; i < maxIter; i++)
+            for (int i = 0; i < Config.MaxIterations; i++)
             {
-                double h = (double) i / maxIter;
+                double h = (double) i / Config.MaxIterations;
                 colors.Add(new Hsl(h, s, l));
             }
             
@@ -77,15 +35,14 @@ namespace Mandelbrot.Core
         /// <summary>
         /// Creates a list of colors in a gradient from hue 0-360
         /// </summary>
-        /// <param name="maxIter"></param>
         /// <returns>List of colors</returns>
-        public static List<Color> GetBernsteinGradients(int maxIter)
+        public static List<Color> GetBernsteinGradients()
         {
             var colors = new List<Color>();
 
-            for (int i = 0; i < maxIter; i++)
+            for (int i = 0; i < Config.MaxIterations; i++)
             {
-                double t = (double)i / maxIter;
+                double t = (double)i / Config.MaxIterations;
                 colors.Add(Color.FromArgb(
                     1,
                     (int)(9 * (1 - t) * Math.Pow(t, 3) * 255),
@@ -93,7 +50,7 @@ namespace Mandelbrot.Core
                     (int)(8.5 * Math.Pow(1 - t, 3) * t * 255)
                     ));
             }
-            colors[maxIter - 1] = Color.FromArgb(0,0,0,0);
+            colors[Config.MaxIterations - 1] = Color.FromArgb(0,0,0,0);
 
             return colors;
         }

@@ -1,8 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 using Mandelbrot.Server.Core;
 using Mandelbrot.Server.Hubs;
-using Microsoft.AspNetCore.ResponseCompression;
-using Microsoft.AspNetCore.SignalR;
 
 namespace Mandelbrot;
 
@@ -31,6 +29,7 @@ public class Program
         //    opts.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(new[] { "application/octet-stream" });
         //});
 
+        ConfigureServices(builder.Services);
         var app = builder.Build();
 
         //app.UseResponseCompression();
@@ -60,7 +59,12 @@ public class Program
         app.MapFallbackToFile("index.html");
         
         app.Run();
+    }
 
+    private static void ConfigureServices(IServiceCollection collection)
+    {
+        collection.AddSingleton<Camera>();
+        collection.AddSingleton<SetGenerator>();
     }
 }
 

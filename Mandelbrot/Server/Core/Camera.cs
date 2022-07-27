@@ -1,24 +1,27 @@
-﻿using Mandelbrot.Shared.Models;
+﻿using Mandelbrot.Shared.Configuration;
+using Mandelbrot.Shared.Models;
 
 namespace Mandelbrot.Server.Core
 {
     public class Camera
     {
+        public BigComplex position { get; set; }
+        public double zoom { get; set; }
+
         private int domain { get; }
         private int range { get; } = 4;
 
         private int imageSizeX { get; }
         private int imageSizeY { get; }
 
-        private BigComplex position { get; set; } = BigComplex.Origin;
-        private double zoom { get; set; } = 0.0;
 
-        public Camera(BigComplex position, double zoom, int imageSizeX, int imageSizeY)
+        public Camera()
         {
-            this.position = position;
-            this.zoom = zoom;
-            this.imageSizeX = imageSizeX;
-            this.imageSizeY = imageSizeY;
+            imageSizeX = Config.IMAGE_WIDTH;
+            imageSizeY = Config.IMAGE_HEIGHT;
+            position = Config.DefaultCameraPosition;
+            zoom = Config.DefaultCameraZoom;
+
             domain = (int)(range * (imageSizeX / (float)imageSizeY));
         }
 
