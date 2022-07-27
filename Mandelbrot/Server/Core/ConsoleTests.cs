@@ -6,12 +6,12 @@ namespace Mandelbrot.Server.Core
 {
     public class ConsoleTests
     {
-        public static void EscapeTimeTest()
-        {
-            var point = new BigComplex((BigDecimal)0.350511, (BigDecimal)0.350511);
-            var escapeTime = SetGenerator.CalcEscapeTime(point);
-            Console.WriteLine($"Point: {point} Escape time: {escapeTime}");
-        }
+        //public static void EscapeTimeTest()
+        //{
+        //    var point = new BigComplex((BigDecimal)0.350511, (BigDecimal)0.350511);
+        //    var escapeTime = SetGenerator.CalcEscapeTime(point);
+        //    Console.WriteLine($"Point: {point} Escape time: {escapeTime}");
+        //}
 
         public static void Colors()
         {

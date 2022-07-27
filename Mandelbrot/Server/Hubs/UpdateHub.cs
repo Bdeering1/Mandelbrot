@@ -15,7 +15,8 @@ namespace Mandelbrot.Server.Hubs
 
             var s = new Stopwatch();
             s.Start();
-            var set = Convert.ToBase64String(SetGenerator.GetBitmap(1400, 800, colors).Encode(SKEncodedImageFormat.Png, 100).ToArray());
+            var generator = new SetGenerator(1400, 800, colors);
+            var set = Convert.ToBase64String(generator.GetBitmap().Encode(SKEncodedImageFormat.Png, 100).ToArray());
             s.Stop();
             Console.WriteLine($"{s.ElapsedMilliseconds / 1000.0}s elapsed");
 

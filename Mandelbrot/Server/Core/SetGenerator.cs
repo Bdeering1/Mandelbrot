@@ -8,84 +8,90 @@ namespace Mandelbrot.Server.Core
 {
     public class SetGenerator
     {
-        public static SKBitmap GetBitmap(int width, int height, List<Color> colors)
+        public int Width { get; set; }
+        public int Height { get; set; }
+        public List<Color> Colors { get; }
+
+        private Camera camera { get; set; }
+        private uint[] set { get; set; }
+
+        public SetGenerator(int width, int height, List<Color> colors)
         {
-            var camera = new Camera(new BigComplex((BigDecimal)0, (BigDecimal)0), 1, width, height);
+            Width = width;
+            Height = height;
+            Colors = colors;
 
-            var imgInfo = new SKImageInfo(width, height, SKColorType.Rgba8888, SKAlphaType.Opaque);
-            var set = new SKBitmap(imgInfo);
-            var setBytes = new uint[width * height];
+            set = new uint[width * height];
+            camera = new Camera(new BigComplex((BigDecimal)0, (BigDecimal)0), 1, Width, Height);
+        }
 
-            int reflectHeight = height;
-            var shouldReflect = camera.GetComplexY(0) > (BigDecimal)0 && camera.GetComplexY(height) < (BigDecimal)0;
+        public SKBitmap GetBitmap()
+        {
+            var imgInfo = new SKImageInfo(Width, Height, SKColorType.Rgba8888, SKAlphaType.Opaque);
+            var bitmap = new SKBitmap(new SKImageInfo(Width, Height, SKColorType.Rgba8888, SKAlphaType.Opaque));
 
-            for (int y = 0; y < height; y++)
+            int reflectHeight = Height;
+            var shouldReflect = camera.GetComplexY(0) > (BigDecimal)0 && camera.GetComplexY(Height) < (BigDecimal)0;
+
+            for (int y = 0; y < Height; y++)
             {
                 if (shouldReflect && camera.GetComplexY(y) < (BigDecimal)0)
                 {
                     reflectHeight = y - 1;
-                    Console.WriteLine($"Reflecting at: {reflectHeight}");
+                    Console.WriteLine($"Reflection point: {reflectHeight}");
                     y = reflectHeight * 2;
                     shouldReflect = false;
                     continue;
                 }
-                for (int x = 0; x < width; x++)
+                for (int x = 0; x < Width; x++)
                 {
-                    var complexPos = camera.GetComplexPos(x, y);
-
-                    if (CheckShapes(complexPos))
-                    {
-                        setBytes[y * width + x] = 0;
-                        continue;
-                    }
-                    int escTime = CalcEscapeTime(complexPos);
-                    var c = colors[escTime - 1];
-                    setBytes[y * width + x] = (uint)((c.A << 24) | (c.B << 16) | (c.G << 8) | (c.R << 0));
+                    ComputePixelValue(x, y);
                 }
                 Console.WriteLine(y);
             }
 
-            for (int y = 1; y < height - reflectHeight; y++)
+            for (int y = 1; y < Height - reflectHeight; y++)
             {
-                if (y == height || reflectHeight - y < 0) break;
-                Console.WriteLine($"{reflectHeight + y} (reflected {reflectHeight - y})");
-                for (int x = 0; x < width; x++)
+                if (y == Height || reflectHeight - y < 0) break;
+                Console.WriteLine($"{reflectHeight + y} (from {reflectHeight - y})");
+                for (int x = 0; x < Width; x++)
                 {
-                    Color c = Color.FromArgb((int)setBytes[(reflectHeight - y) * width + x]);
-                    setBytes[(reflectHeight + y) * width + x] = (uint)((c.A << 24) | (c.R << 16) | (c.G << 8) | (c.B << 0));
-                    //set.SetPixel(x, reflectHeight + y, set.GetPixel(x, reflectHeight - y));
+                    set[(reflectHeight + y) * Width + x] = set[(reflectHeight - y) * Width + x];
                 }
             }
 
             //copy byte array to the bitmap for easy handling/compression
-            var gcHandle = GCHandle.Alloc(setBytes, GCHandleType.Pinned); //makes sure the byte array doesnt get moved in memory, so that the pointer can be used
-            set.InstallPixels(imgInfo, gcHandle.AddrOfPinnedObject(), imgInfo.RowBytes, delegate { gcHandle.Free(); }, null);
+            var gcHandle = GCHandle.Alloc(set, GCHandleType.Pinned); //makes sure the byte array doesnt get moved in memory, so that the pointer can be used
+            bitmap.InstallPixels(imgInfo, gcHandle.AddrOfPinnedObject(), imgInfo.RowBytes, delegate { gcHandle.Free(); }, null);
 
-            //draw lines to see centre of screen
-            //using (var bitmapCanvas = new SKCanvas(set))
-            //{
-            //    var paint = new SKPaint
-            //    {
-            //        Color = new SKColor(255, 255, 255)
-            //    };
-            //    bitmapCanvas.DrawLine(new SKPoint(0, height / 2), new SKPoint(width, height / 2), paint);
-            //    bitmapCanvas.DrawLine(new SKPoint(width / 2, 0), new SKPoint(width / 2, height), paint);
-            //}
+            DrawCenterLines(bitmap);
 
-            return set;
+            return bitmap;
         }
 
-        private static bool CheckShapes(BigComplex pos)
+        private void ComputePixelValue(int x, int y)
         {
-            BigDecimal iSquared = pos.i * pos.i;
-            BigDecimal a = pos.r - (BigDecimal)0.25;
-            BigDecimal q = a * a + iSquared;
-            if (q * (q + a) < iSquared * (BigDecimal)0.25
-                || (pos.r * pos.r) + ((BigDecimal)2 * pos.r) + (BigDecimal)1 + iSquared < (BigDecimal)0.0625)
+            var complexPos = camera.GetComplexPos(x, y);
+
+            if (CheckShapes(complexPos))
             {
-                return true;
+                set[y * Width + x] = 0;
+                return;
             }
-            return false;
+            int escTime = CalcEscapeTime(complexPos);
+            var c = Colors[escTime - 1];
+            set[y * Width + x] = (uint)((c.A << 24) | (c.B << 16) | (c.G << 8) | (c.R << 0));
+        }
+
+        private void DrawCenterLines(SKBitmap set)
+        {
+            using var bitmapCanvas = new SKCanvas(set);
+            var paint = new SKPaint
+            {
+                Color = new SKColor(255, 255, 255)
+            };
+            bitmapCanvas.DrawLine(new SKPoint(0, Height / 2), new SKPoint(Width, Height / 2), paint);
+            bitmapCanvas.DrawLine(new SKPoint(Width / 2, 0), new SKPoint(Width / 2, Height), paint);
         }
 
         private static int CalcEscapeTime(BigComplex pt)
@@ -105,6 +111,19 @@ namespace Mandelbrot.Server.Core
                 iter++;
             }
             return iter;
+        }
+
+        private static bool CheckShapes(BigComplex pos)
+        {
+            BigDecimal iSquared = pos.i * pos.i;
+            BigDecimal a = pos.r - (BigDecimal)0.25;
+            BigDecimal q = a * a + iSquared;
+            if (q * (q + a) < iSquared * (BigDecimal)0.25
+                || (pos.r * pos.r) + ((BigDecimal)2 * pos.r) + (BigDecimal)1 + iSquared < (BigDecimal)0.0625)
+            {
+                return true;
+            }
+            return false;
         }
     }
 }
