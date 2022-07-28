@@ -22,9 +22,10 @@ namespace Mandelbrot.Server.Core
             set = new uint[width * height];
         }
 
-        public SKBitmap GetBitmap()
+        public async Task<SKBitmap> GetBitmap()
         {
-            ComputeSetNaively();
+            await ComputeSetNaivelyParallel();
+            await Task.Yield();
 
             var imgInfo = new SKImageInfo(width, height, SKColorType.Rgba8888, SKAlphaType.Opaque);
             var bitmap = new SKBitmap(new SKImageInfo(width, height, SKColorType.Rgba8888, SKAlphaType.Opaque));
@@ -85,6 +86,24 @@ namespace Mandelbrot.Server.Core
                     set[(reflectHeight + y) * width + x] = set[(reflectHeight - y) * width + x];
                 }
             }
+        }
+
+        private async Task ComputeSetNaivelyParallel()
+        {
+            var taskList = new List<Task>();
+            for (int y = 0; y < height; y++)
+            {
+                int capturedY = y;
+
+                taskList.Add(Task.Run(() =>
+                {
+                    for (int x = 0; x < width; x++)
+                    {
+                        ComputePixelValue(x, capturedY);
+                    }
+                }));
+            }
+            await Task.WhenAll(taskList);
         }
 
         private void ComputePixelValue(int x, int y)
