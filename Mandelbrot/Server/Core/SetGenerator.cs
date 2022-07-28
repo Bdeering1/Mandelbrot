@@ -15,16 +15,18 @@ namespace Mandelbrot.Server.Core
         private Camera camera { get; }
         private uint[] set { get; set; }
 
+        private int rectsCalculated = 0;
+        private int pxCalculated = 0;
+
         public SetGenerator(Camera camera)
         {
             this.camera = camera;
 
             set = new uint[width * height];
         }
-
         public async Task<SKBitmap> GetBitmap()
         {
-            await ComputeSetNaivelyParallel();
+            ComputeSetRecursiveRectangles();
             await Task.Yield();
 
             var imgInfo = new SKImageInfo(width, height, SKColorType.Rgba8888, SKAlphaType.Opaque);
@@ -34,25 +36,94 @@ namespace Mandelbrot.Server.Core
             var gcHandle = GCHandle.Alloc(set, GCHandleType.Pinned); //makes sure the byte array doesnt get moved in memory, so that the pointer can be used
             bitmap.InstallPixels(imgInfo, gcHandle.AddrOfPinnedObject(), imgInfo.RowBytes, delegate { gcHandle.Free(); }, null);
 
-            DrawGridLines(bitmap);
+            //DrawGridLines(bitmap);
+
+            Console.WriteLine($"{rectsCalculated} rectangles used");
+            Console.WriteLine($"{pxCalculated} pixels calculated");
 
             return bitmap;
         }
-
-        private void ComputeRectangleRecursively()
+        private void ComputeSetRecursiveRectangles()
         {
-            /* base case:
-             * all edge points have the same escape time
-             * 
-             * - fill in this rectangle
-             * - return
-             */
+            ComputeRectangleRecursively(0, 0, width / 2, height / 2);
+            ComputeRectangleRecursively(width / 2, 0, width - 1, height / 2);
+            ComputeRectangleRecursively(0, height / 2, width / 2, height - 1);
+            ComputeRectangleRecursively(width / 2, height / 2, width - 1, height - 1);
+        }
 
-            /* recursive case
-             * at least one point is different
-             * 
-             * - call this function for four inner rectangles
-             */
+        private void ComputeRectangleRecursively(int leftX, int topY, int rightX, int bottomY)
+        {
+            bool subdivides = false;
+            int escTime = CalcEscapeTime(camera.GetComplexPos(leftX, topY));
+
+            int w = rightX - leftX;
+            int h = bottomY - topY;
+
+            if (w <= 2 || h <= 2)
+            {
+                for (int x = leftX; x < rightX; x++)
+                {
+                    for (int y = topY; y < bottomY; y++)
+                    {
+                        ComputePixelValue(x, y);
+                        if(x == leftX || x == rightX - 1 || y == topY || y == bottomY - 1)
+                        {
+                            set[y * width + x] = 0x00ff00;
+                        }
+                    }
+                }
+                return;
+            }
+
+            for (int x = leftX; x < rightX; x++)
+            {
+                //calculate escape time for both bottom and top edges (this also sets their color in the byte array)
+                int currentEscTimeTop = ComputePixelValue(x, topY);
+                int currentEscTimeBottom = ComputePixelValue(x, bottomY);
+
+                pxCalculated += 2;
+
+                if (currentEscTimeTop != escTime || currentEscTimeBottom != escTime)
+                {
+                    subdivides = true;
+                    break;
+                }
+            }
+            //only check other two edges if we didnt already find a different pixel
+            if(!subdivides)
+            {
+                for (int y = topY; y < bottomY; y++)
+                {
+                    int currentEscTimeLeft = ComputePixelValue(leftX, y);
+                    int currentEscTimeRight = ComputePixelValue(rightX, y);
+
+                    pxCalculated += 2;
+
+                    if (currentEscTimeLeft != escTime || currentEscTimeRight != escTime)
+                    {
+                        subdivides = true;
+                        break;
+                    }
+                }
+            }
+
+            if(!subdivides)
+            {
+                FillRect(leftX, topY, rightX, bottomY, escTime);
+                return;
+            }
+            int w2 = (rightX - leftX) / 2;
+            int h2 = (bottomY - topY) / 2;
+
+            //top left rect
+            ComputeRectangleRecursively(leftX, topY, rightX - w2, bottomY - h2);
+            //top right rect
+            ComputeRectangleRecursively(leftX + w2, topY, rightX, bottomY - h2);
+            //bottom left rect
+            ComputeRectangleRecursively(leftX, topY + h2, rightX - w2, bottomY);
+            //bottom right rect
+            ComputeRectangleRecursively(leftX + w2, topY + h2, rightX, bottomY);
+            rectsCalculated += 4;
         }
 
         private void ComputeSetNaively()
@@ -106,18 +177,37 @@ namespace Mandelbrot.Server.Core
             await Task.WhenAll(taskList);
         }
 
-        private void ComputePixelValue(int x, int y)
+        private void FillRect(int leftX, int topY, int rightX, int bottomY, int escTime)
+        {
+            var c = colors[escTime - 1];
+            uint col = (uint)((c.A << 24) | (c.B << 16) | (c.G << 8) | (c.R << 0));
+
+            for(int x = leftX; x < rightX; x++)
+            {
+                for(int y = topY; y < bottomY; y++)
+                {
+                    if (x == leftX || x == rightX - 1 || y == topY || y == bottomY - 1)
+                    {
+                        set[y * width + x] = 0x00ff00;
+                    } else set[y * width + x] = col;
+                }
+            }
+        }
+
+        private int ComputePixelValue(int x, int y)
         {
             var complexPos = camera.GetComplexPos(x, y);
 
             if (CheckShapes(complexPos))
             {
                 set[y * width + x] = 0;
-                return;
+                return Config.MaxIterations;
             }
             int escTime = CalcEscapeTime(complexPos);
             var c = colors[escTime - 1];
             set[y * width + x] = (uint)((c.A << 24) | (c.B << 16) | (c.G << 8) | (c.R << 0));
+
+            return escTime;
         }
 
         private void DrawGridLines(SKBitmap set)
