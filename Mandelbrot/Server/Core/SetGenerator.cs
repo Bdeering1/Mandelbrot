@@ -38,6 +38,22 @@ namespace Mandelbrot.Server.Core
             return bitmap;
         }
 
+        private void ComputeRectangleRecursively()
+        {
+            /* base case:
+             * all edge points have the same escape time
+             * 
+             * - fill in this rectangle
+             * - return
+             */
+
+            /* recursive case
+             * at least one point is different
+             * 
+             * - call this function for four inner rectangles
+             */
+        }
+
         private void ComputeSetNaively()
         {
             int reflectHeight = height;
