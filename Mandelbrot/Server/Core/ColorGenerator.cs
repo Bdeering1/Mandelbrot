@@ -55,14 +55,11 @@ namespace Mandelbrot.Core
             return colors;
         }
 
-        public static string GetHex(Color c) =>
-        $"#{c.R:X2}{c.G:X2}{c.B:X2}";
+        public static string GetHex(Color c) => $"#{c.R:X2}{c.G:X2}{c.B:X2}";
 
         private static Color FromHsl(Hsl hsl)
         {
-            int r;
-            int g;
-            int b;
+            int r, g, b;
 
             if (hsl.Saturation == 0)
             {
@@ -85,11 +82,9 @@ namespace Mandelbrot.Core
 
         private static double HueToRGB(double v1, double v2, double vH)
         {
-            if (vH < 0)
-                vH += 1;
+            if (vH < 0) vH += 1;
 
-            if (vH > 1)
-                vH -= 1;
+            if (vH > 1) vH -= 1;
 
             if ((6 * vH) < 1)
                 return (v1 + (v2 - v1) * 6 * vH);

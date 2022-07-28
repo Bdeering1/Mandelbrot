@@ -19,17 +19,27 @@ namespace Mandelbrot.Server.Core
         {
             this.camera = camera;
 
-            camera.position = new(-1.625, 0);
-            camera.zoom = 35;
-
             set = new uint[width * height];
         }
 
         public SKBitmap GetBitmap()
         {
+            ComputeSetNaively();
+
             var imgInfo = new SKImageInfo(width, height, SKColorType.Rgba8888, SKAlphaType.Opaque);
             var bitmap = new SKBitmap(new SKImageInfo(width, height, SKColorType.Rgba8888, SKAlphaType.Opaque));
 
+            //copy byte array to the bitmap for easy handling/compression
+            var gcHandle = GCHandle.Alloc(set, GCHandleType.Pinned); //makes sure the byte array doesnt get moved in memory, so that the pointer can be used
+            bitmap.InstallPixels(imgInfo, gcHandle.AddrOfPinnedObject(), imgInfo.RowBytes, delegate { gcHandle.Free(); }, null);
+
+            DrawGridLines(bitmap);
+
+            return bitmap;
+        }
+
+        private void ComputeSetNaively()
+        {
             int reflectHeight = height;
             var shouldReflect = camera.GetComplexY(0) > (BigDecimal)0 && camera.GetComplexY(height) < (BigDecimal)0;
 
@@ -59,14 +69,6 @@ namespace Mandelbrot.Server.Core
                     set[(reflectHeight + y) * width + x] = set[(reflectHeight - y) * width + x];
                 }
             }
-
-            //copy byte array to the bitmap for easy handling/compression
-            var gcHandle = GCHandle.Alloc(set, GCHandleType.Pinned); //makes sure the byte array doesnt get moved in memory, so that the pointer can be used
-            bitmap.InstallPixels(imgInfo, gcHandle.AddrOfPinnedObject(), imgInfo.RowBytes, delegate { gcHandle.Free(); }, null);
-
-            DrawCenterLines(bitmap);
-
-            return bitmap;
         }
 
         private void ComputePixelValue(int x, int y)
@@ -83,15 +85,38 @@ namespace Mandelbrot.Server.Core
             set[y * width + x] = (uint)((c.A << 24) | (c.B << 16) | (c.G << 8) | (c.R << 0));
         }
 
-        private void DrawCenterLines(SKBitmap set)
-        {
+        private void DrawGridLines(SKBitmap set)
+        {   
             using var bitmapCanvas = new SKCanvas(set);
-            var paint = new SKPaint
-            {
+            var paint = new SKPaint {
                 Color = new SKColor(255, 255, 255)
             };
-            bitmapCanvas.DrawLine(new SKPoint(0, height / 2), new SKPoint(width, height / 2), paint);
-            bitmapCanvas.DrawLine(new SKPoint(width / 2, 0), new SKPoint(width / 2, height), paint);
+            var paintCenter = new SKPaint
+            {
+                Color = new SKColor(255, 0, 0)
+            };
+            const int gridSpacing = 200;
+            var centerX = width / 2;
+            var centerY = height / 2;
+            var xDif = gridSpacing;
+            var yDif = gridSpacing;
+
+            bitmapCanvas.DrawLine(new SKPoint(centerX, 0), new SKPoint(centerX, height), paintCenter);
+            bitmapCanvas.DrawLine(new SKPoint(0, centerY), new SKPoint(width, centerY), paintCenter);
+
+
+            while (centerX - xDif > 0)
+            {
+                bitmapCanvas.DrawLine(new SKPoint(centerX - xDif, 0), new SKPoint(centerX - xDif, height), paint);
+                bitmapCanvas.DrawLine(new SKPoint(centerX + xDif, 0), new SKPoint(centerX + xDif, height), paint);
+                xDif += gridSpacing;
+            }
+            while (centerY - yDif > 0)
+            {
+                bitmapCanvas.DrawLine(new SKPoint(0, centerY - yDif), new SKPoint(width, centerY - yDif), paint);
+                bitmapCanvas.DrawLine(new SKPoint(0, centerY + yDif), new SKPoint(width, centerY + yDif), paint);
+                yDif += gridSpacing;
+            }
         }
 
         private static int CalcEscapeTime(BigComplex pt)
@@ -115,9 +140,9 @@ namespace Mandelbrot.Server.Core
 
         private static bool CheckShapes(BigComplex pos)
         {
-            BigDecimal iSquared = pos.i * pos.i;
-            BigDecimal a = pos.r - (BigDecimal)0.25;
-            BigDecimal q = a * a + iSquared;
+            var iSquared = pos.i * pos.i;
+            var a = pos.r - (BigDecimal)0.25;
+            var q = a * a + iSquared;
             if (q * (q + a) < iSquared * (BigDecimal)0.25
                 || (pos.r * pos.r) + ((BigDecimal)2 * pos.r) + (BigDecimal)1 + iSquared < (BigDecimal)0.0625)
             {
