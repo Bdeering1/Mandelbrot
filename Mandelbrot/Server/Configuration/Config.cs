@@ -13,7 +13,7 @@ namespace Mandelbrot.Shared.Configuration
         public static double DefaultCameraZoom { get; } = 1.0;
 
         public static int Precision { get; } = 25;
-        public static int MaxIterations { get; } = 100;
+        public static uint MaxIterations { get; } = 100;
 
         public static List<Color> Colors { get; } = ColorGenerator.GetBernsteinGradients();
     }

@@ -50,7 +50,7 @@ namespace Mandelbrot.Core
                     (int)(8.5 * Math.Pow(1 - t, 3) * t * 255)
                     ));
             }
-            colors[Config.MaxIterations - 1] = Color.FromArgb(0,0,0,0);
+            colors[(int)Config.MaxIterations - 1] = Color.FromArgb(0,0,0,0);
 
             return colors;
         }

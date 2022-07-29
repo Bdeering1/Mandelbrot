@@ -76,61 +76,39 @@ namespace Mandelbrot.Server.Core
 
         private void ComputeRectangleRecursively(int leftX, int topY, int rightX, int bottomY)
         {
-            bool subdivides = false;
-
             int w = rightX - leftX;
             int h = bottomY - topY;
             if (w <= 5 || h <= 5)
             {
-                for (int x = leftX; x <= rightX; x++)
-                {
-                    for (int y = topY; y <= bottomY; y++)
-                    {
-                        ComputePixelValue(x, y);
-                        if (showRects && (x == leftX || x == rightX || y == topY || y == bottomY))
-                        {
-                            bytes[y * width + x] = 0x00ff00;
-                        }
-                    }
-                }
+                ComputeRect(leftX, topY, rightX, bottomY);
                 return;
             }
 
-            int escTime = ComputePixelValue(leftX, topY);
-            for (int x = leftX; x <= rightX; x++)
+            var escTime = ComputePixelValue(leftX, topY);
+            for (int x = leftX; x <= rightX; x += 2)
             {
-                //calculate escape time for both bottom and top edges (this also sets their color in the byte array)
-                int currentEscTimeTop = ComputePixelValue(x, topY);
-                int currentEscTimeBottom = ComputePixelValue(x, bottomY);
-
-                if (currentEscTimeTop != escTime || currentEscTimeBottom != escTime)
+                if (ComputePixelValue(x, topY) != escTime
+                    || ComputePixelValue(x, bottomY) != escTime)
                 {
-                    subdivides = true;
-                    break;
+                    HandleRecursiveCase(leftX, topY, rightX, bottomY);
+                    return;
                 }
             }
-            //only check other two edges if we didnt already find a different pixel
-            if (!subdivides)
+            for (int y = topY + 1; y < bottomY; y += 2)
             {
-                for (int y = topY + 1; y < bottomY; y++)
+                if (ComputePixelValue(leftX, y) != escTime
+                    || ComputePixelValue(rightX, y) != escTime)
                 {
-                    int currentEscTimeLeft = ComputePixelValue(leftX, y);
-                    int currentEscTimeRight = ComputePixelValue(rightX, y);
-
-                    if (currentEscTimeLeft != escTime || currentEscTimeRight != escTime)
-                    {
-                        subdivides = true;
-                        break;
-                    }
+                    HandleRecursiveCase(leftX, topY, rightX, bottomY);
+                    return;
                 }
             }
 
-            if (!subdivides)
-            {
-                FillRect(leftX, topY, rightX, bottomY, escTime);
-                return;
-            }
+            FillRect(leftX, topY, rightX, bottomY, escTime);
+        }
 
+        private void HandleRecursiveCase(int leftX, int topY, int rightX, int bottomY)
+        {
             if (overlap)
             {
                 var xDim = (rightX - leftX + 1) / 2;
@@ -204,9 +182,9 @@ namespace Mandelbrot.Server.Core
             await Task.WhenAll(taskList);
         }
 
-        private void FillRect(int leftX, int topY, int rightX, int bottomY, int escTime)
+        private void FillRect(int leftX, int topY, int rightX, int bottomY, uint escTime)
         {
-            var c = colors[escTime - 1];
+            var c = colors[(int)escTime - 1];
             uint col = (uint)((c.A << 24) | (c.B << 16) | (c.G << 8) | (c.R << 0));
 
             for(int x = leftX; x <= rightX; x++)
@@ -218,18 +196,33 @@ namespace Mandelbrot.Server.Core
                         bytes[y * width + x] = 0x00ff00;
                         continue;
                     }
-                    escapeTimes[y * width + x] = (uint)escTime;
+                    escapeTimes[y * width + x] = escTime;
                     bytes[y * width + x] = col;
                 }
             }
         }
 
-        private int ComputePixelValue(int x, int y)
+        private void ComputeRect(int leftX, int topY, int rightX, int bottomY)
+        {
+            for (int x = leftX; x <= rightX; x++)
+            {
+                for (int y = topY; y <= bottomY; y++)
+                {
+                    ComputePixelValue(x, y);
+                    if (showRects && (x == leftX || x == rightX || y == topY || y == bottomY))
+                    {
+                        bytes[y * width + x] = 0x00ff00;
+                    }
+                }
+            }
+        }
+
+        private uint ComputePixelValue(int x, int y)
         {
             var pixelPos = y * width + x;
             if (escapeTimes[pixelPos] != default)
             {
-                return (int)escapeTimes[pixelPos];
+                return escapeTimes[pixelPos];
             }
 
             pxCalculated++;
@@ -237,14 +230,14 @@ namespace Mandelbrot.Server.Core
             if (CheckShapes(complexPos))
             {
                 bytes[pixelPos] = 0;
-                escapeTimes[pixelPos] = (uint)Config.MaxIterations;
+                escapeTimes[pixelPos] = Config.MaxIterations;
                 return Config.MaxIterations;
             }
 
-            int escTime = CalcEscapeTime(complexPos);
-            var c = colors[escTime - 1];
+            var escTime = CalcEscapeTime(complexPos);
+            var c = colors[(int)escTime - 1];
             bytes[pixelPos] = (uint)((c.A << 24) | (c.B << 16) | (c.G << 8) | (c.R << 0));
-            escapeTimes[pixelPos] = (uint)escTime;
+            escapeTimes[pixelPos] = escTime;
 
             return escTime;
         }
@@ -283,7 +276,7 @@ namespace Mandelbrot.Server.Core
             }
         }
 
-        private static int CalcEscapeTime(BigComplex pt)
+        private static uint CalcEscapeTime(BigComplex pt)
         {
             var constant = new BigComplex(pt.r, pt.i);
             var current = BigComplex.Origin;
@@ -291,7 +284,7 @@ namespace Mandelbrot.Server.Core
             var rSquared = (BigDecimal)0;
             var iSquared = (BigDecimal)0;
 
-            int iter = 0;
+            uint iter = 0;
             while (rSquared + iSquared <= new BigDecimal(4) && iter < Config.MaxIterations)
             {
                 current = new BigComplex(rSquared - iSquared, current.r * current.i + current.i * current.r) + constant;
