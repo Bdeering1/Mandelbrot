@@ -16,6 +16,7 @@ namespace Mandelbrot.Server.Core
         private uint[] bytes { get; set; }
         private uint[] escapeTimes { get; set; }
 
+        private bool showRects = true;
         private int rectsCalculated = 0;
         private int pxCalculated = 0;
 
@@ -25,6 +26,14 @@ namespace Mandelbrot.Server.Core
 
             bytes = new uint[width * height];
             escapeTimes = new uint[width * height];
+
+            for (int x = 0; x < width; x++)
+            {
+                for (int y = 0; y < height; y++)
+                {
+                    bytes[y * width + x] = 0xff00ff;
+                }
+            }
         }
         public async Task<SKBitmap> GetBitmap()
         {
@@ -48,14 +57,17 @@ namespace Mandelbrot.Server.Core
         private void ComputeSetRecursiveRectangles()
         {
             var numDivisions = 20;
-            var xDim = width / numDivisions;
-            var yDim = height / numDivisions;
+            var xDim = width / (float)numDivisions;
+            var yDim = height / (float)numDivisions;
 
             for (int i = 0; i < numDivisions; i++)
             {
                 for (int j = 0; j < numDivisions; j++)
                 {
-                    ComputeRectangleRecursively(i * xDim, j * yDim, i * xDim + xDim - 1, j * yDim + yDim - 1);
+                    ComputeRectangleRecursively((int)(i * xDim),
+                                                (int)(j * yDim),
+                                                (int)(i * xDim + xDim - 1),
+                                                (int)(j * yDim + yDim - 1));
                 }
             }
         }
@@ -68,12 +80,12 @@ namespace Mandelbrot.Server.Core
             int h = bottomY - topY;
             if (w <= 5 || h <= 5)
             {
-                for (int x = leftX; x < rightX; x++)
+                for (int x = leftX; x <= rightX; x++)
                 {
-                    for (int y = topY; y < bottomY; y++)
+                    for (int y = topY; y <= bottomY; y++)
                     {
                         ComputePixelValue(x, y);
-                        if (x == leftX || x == rightX - 1 || y == topY || y == bottomY - 1)
+                        if (showRects && (x == leftX || x == rightX || y == topY || y == bottomY))
                         {
                             bytes[y * width + x] = 0x00ff00;
                         }
@@ -82,7 +94,7 @@ namespace Mandelbrot.Server.Core
                 return;
             }
 
-            int escTime = CalcEscapeTime(camera.GetComplexPos(leftX, topY));
+            int escTime = ComputePixelValue(leftX, topY);
             for (int x = leftX; x <= rightX; x++)
             {
                 //calculate escape time for both bottom and top edges (this also sets their color in the byte array)
@@ -182,11 +194,11 @@ namespace Mandelbrot.Server.Core
             var c = colors[escTime - 1];
             uint col = (uint)((c.A << 24) | (c.B << 16) | (c.G << 8) | (c.R << 0));
 
-            for(int x = leftX; x < rightX; x++)
+            for(int x = leftX; x <= rightX; x++)
             {
-                for(int y = topY; y < bottomY; y++)
+                for(int y = topY; y <= bottomY; y++)
                 {
-                    if (x == leftX || x == rightX - 1 || y == topY || y == bottomY - 1)
+                    if (showRects && (x == leftX || x == rightX || y == topY || y == bottomY))
                     {
                         bytes[y * width + x] = 0x00ff00;
                         continue;
