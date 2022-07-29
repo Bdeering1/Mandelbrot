@@ -16,6 +16,8 @@ namespace Mandelbrot.Server.Core
         private uint[] bytes { get; set; }
         private uint[] escapeTimes { get; set; }
 
+        private bool overlap = true;
+
         private bool showRects = true;
         private int rectsCalculated = 0;
         private int pxCalculated = 0;
@@ -129,13 +131,26 @@ namespace Mandelbrot.Server.Core
                 return;
             }
 
-            int w2 = (rightX - leftX) / 2;
-            int h2 = (bottomY - topY) / 2;
-            ComputeRectangleRecursively(leftX, topY, rightX - w2, bottomY - h2);
-            ComputeRectangleRecursively(leftX + w2, topY, rightX, bottomY - h2);
-            ComputeRectangleRecursively(leftX, topY + h2, rightX - w2, bottomY);
-            ComputeRectangleRecursively(leftX + w2, topY + h2, rightX, bottomY);
-            rectsCalculated += 4;
+            if (overlap)
+            {
+                var xDim = (rightX - leftX + 1) / 2;
+                var yDim = (bottomY - topY + 1) / 2;
+                ComputeRectangleRecursively(leftX, topY, leftX + xDim, topY + yDim);
+                ComputeRectangleRecursively(leftX + xDim, topY, rightX, topY + yDim);
+                ComputeRectangleRecursively(leftX, topY + yDim, leftX + xDim, bottomY);
+                ComputeRectangleRecursively(leftX + xDim, topY + yDim, rightX, bottomY);
+                rectsCalculated += 4;
+            }
+            else
+            {
+                var xDim = (rightX - leftX + 1) / 2;
+                var yDim = (bottomY - topY + 1) / 2;
+                ComputeRectangleRecursively(leftX, topY, leftX + xDim - 1, topY + yDim - 1);
+                ComputeRectangleRecursively(leftX + xDim, topY, rightX, topY + yDim - 1);
+                ComputeRectangleRecursively(leftX, topY + yDim, leftX + xDim - 1, bottomY);
+                ComputeRectangleRecursively(leftX + xDim, topY + yDim, rightX, bottomY);
+                rectsCalculated += 4;
+            }
         }
 
         private void ComputeSetNaively()
@@ -203,6 +218,7 @@ namespace Mandelbrot.Server.Core
                         bytes[y * width + x] = 0x00ff00;
                         continue;
                     }
+                    escapeTimes[y * width + x] = (uint)escTime;
                     bytes[y * width + x] = col;
                 }
             }
