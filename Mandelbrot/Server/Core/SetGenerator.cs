@@ -18,7 +18,7 @@ namespace Mandelbrot.Server.Core
 
         private bool overlap = true;
 
-        private bool showRects = true;
+        private bool showRects = false;
         private int rectsCalculated = 0;
         private int pxCalculated = 0;
 
@@ -54,11 +54,12 @@ namespace Mandelbrot.Server.Core
             Console.WriteLine($"{rectsCalculated} rectangles used");
             Console.WriteLine($"{pxCalculated} pixels calculated ({pxCalculated / (double)(width * height) * 100:0.##}%)");
 
+
             return bitmap;
         }
         private void ComputeSetRecursiveRectangles()
         {
-            var numDivisions = 20;
+            var numDivisions = 15;
             var xDim = width / (float)numDivisions;
             var yDim = height / (float)numDivisions;
 
@@ -84,11 +85,13 @@ namespace Mandelbrot.Server.Core
                 return;
             }
 
-            var escTime = ComputePixelValue(leftX, topY);
+            var escTime = (int)ComputePixelValue(leftX + w/2, topY + h/2);
             for (int x = leftX; x <= rightX; x += 2)
             {
-                if (ComputePixelValue(x, topY) != escTime
-                    || ComputePixelValue(x, bottomY) != escTime)
+                uint pt1 = ComputePixelValue(x, topY);
+                uint pt2 = ComputePixelValue(x, bottomY);
+                if (!(pt1 >= escTime - 2 && pt1 <= escTime + 2)
+                    || !(pt2 >= escTime - 2 && pt2 <= escTime + 2))
                 {
                     HandleRecursiveCase(leftX, topY, rightX, bottomY);
                     return;
@@ -96,15 +99,17 @@ namespace Mandelbrot.Server.Core
             }
             for (int y = topY + 1; y < bottomY; y += 2)
             {
-                if (ComputePixelValue(leftX, y) != escTime
-                    || ComputePixelValue(rightX, y) != escTime)
+                uint pt1 = ComputePixelValue(leftX, y);
+                uint pt2 = ComputePixelValue(rightX, y);
+                if (!(pt1 >= escTime - 2 && pt1 <= escTime + 2)
+                    || !(pt2 >= escTime - 2 && pt2 <= escTime + 2))
                 {
                     HandleRecursiveCase(leftX, topY, rightX, bottomY);
                     return;
                 }
             }
 
-            FillRect(leftX, topY, rightX, bottomY, escTime);
+            FillRect(leftX, topY, rightX, bottomY, (uint)escTime);
         }
 
         private void HandleRecursiveCase(int leftX, int topY, int rightX, int bottomY)
@@ -194,6 +199,7 @@ namespace Mandelbrot.Server.Core
                     if (showRects && (x == leftX || x == rightX || y == topY || y == bottomY))
                     {
                         bytes[y * width + x] = 0x00ff00;
+                        escapeTimes[y * width + x] = escTime;
                         continue;
                     }
                     escapeTimes[y * width + x] = escTime;
