@@ -39,15 +39,31 @@ namespace Mandelbrot.Server.Core
         }
         public async Task<SKBitmap> GetBitmap()
         {
-            //10k x 10k image
-            //133212 rectangles used
-            //2702938 pixels calculated(2.7 %)
-            //369.661s elapsed
+            /*
+            750x750 image:
+            
+            Parallel Naive algo
+            0 rectangles used
+            561775 pixels calculated(99.87 %)
+            10.641s elapsed
 
-            //1k x 1k image
-            //5120 rectangles used
-            //91372 pixels calculated(9.14 %)
-            //6.735s elapsed
+            Parallel Rects algo
+            5168 rectangles used
+            58512 pixels calculated (10.4%)
+            3.503s elapsed
+
+            2500x2500 image:
+
+            Parallel Naive algo
+            0 rectangles used
+            6238129 pixels calculated (99.81%)
+            85.18s elapsed
+
+            Parallel Rects algo
+            15416 rectangles used
+            350054 pixels calculated (5.6%)
+            34.204s elapsed
+            */
 
             await ComputeSetNaivelyParallel();
             await Task.Yield();
