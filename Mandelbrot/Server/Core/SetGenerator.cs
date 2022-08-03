@@ -39,7 +39,17 @@ namespace Mandelbrot.Server.Core
         }
         public async Task<SKBitmap> GetBitmap()
         {
-            ComputeSetRecursiveRectangles();
+            //10k x 10k image
+            //133212 rectangles used
+            //2702938 pixels calculated(2.7 %)
+            //369.661s elapsed
+
+            //1k x 1k image
+            //5120 rectangles used
+            //91372 pixels calculated(9.14 %)
+            //6.735s elapsed
+
+            await ComputeSetNaivelyParallel();
             await Task.Yield();
 
             var imgInfo = new SKImageInfo(width, height, SKColorType.Rgba8888, SKAlphaType.Opaque);
@@ -73,6 +83,38 @@ namespace Mandelbrot.Server.Core
                                                 (int)(j * yDim + yDim - 1));
                 }
             }
+        }
+
+        private async Task ComputeSetRecursiveRectanglesParallel()
+        {
+            var numDivisions = 15;
+            var xDim = width / (float)numDivisions;
+            var yDim = height / (float)numDivisions;
+
+            var taskList = new List<Task>();
+            int tasks = 0;
+            int tasksFinished = 0;
+
+            for (int i = 0; i < numDivisions; i++)
+            {
+                int newI = i;
+                for (int j = 0; j < numDivisions; j++)
+                {
+                    int newJ = j;
+                    tasks++;
+                    taskList.Add(Task.Run(() =>
+                    {
+                        ComputeRectangleRecursively((int)(newI * xDim),
+                                                (int)(newJ * yDim),
+                                                (int)(newI * xDim + xDim - 1),
+                                                (int)(newJ * yDim + yDim - 1));
+                        tasksFinished++;
+                        Console.WriteLine(tasksFinished + "/" + (i * j));
+                    }));
+                }
+            }
+            Console.WriteLine(tasks + " threads started");
+            await Task.WhenAll(taskList);
         }
 
         private void ComputeRectangleRecursively(int leftX, int topY, int rightX, int bottomY)
