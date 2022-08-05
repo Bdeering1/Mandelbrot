@@ -16,6 +16,7 @@ namespace Mandelbrot.Server.Core
         private uint[] bytes { get; set; }
         private uint[] escapeTimes { get; set; }
 
+        private int tolerance = 2;
         private bool overlap = true;
 
         private bool showRects = false;
@@ -143,13 +144,11 @@ namespace Mandelbrot.Server.Core
                 return;
             }
 
-            var escTime = (int)ComputePixelValue(leftX + w/2, topY + h/2);
+            var escTime = ComputePixelValue(leftX + w/2, topY + h/2);
             for (int x = leftX; x <= rightX; x += 2)
             {
-                uint pt1 = ComputePixelValue(x, topY);
-                uint pt2 = ComputePixelValue(x, bottomY);
-                if (!(pt1 >= escTime - 2 && pt1 <= escTime + 2)
-                    || !(pt2 >= escTime - 2 && pt2 <= escTime + 2))
+                if (Math.Abs(ComputePixelValue(x, topY) - escTime) > tolerance
+                    || Math.Abs(ComputePixelValue(x, bottomY) - escTime) > tolerance)
                 {
                     HandleRecursiveCase(leftX, topY, rightX, bottomY);
                     return;
@@ -157,17 +156,15 @@ namespace Mandelbrot.Server.Core
             }
             for (int y = topY + 1; y < bottomY; y += 2)
             {
-                uint pt1 = ComputePixelValue(leftX, y);
-                uint pt2 = ComputePixelValue(rightX, y);
-                if (!(pt1 >= escTime - 2 && pt1 <= escTime + 2)
-                    || !(pt2 >= escTime - 2 && pt2 <= escTime + 2))
+                if (Math.Abs(ComputePixelValue(leftX, y) - escTime) > tolerance
+                    || Math.Abs(ComputePixelValue(rightX, y) - escTime) > tolerance)
                 {
                     HandleRecursiveCase(leftX, topY, rightX, bottomY);
                     return;
                 }
             }
 
-            FillRect(leftX, topY, rightX, bottomY, (uint)escTime);
+            FillRect(leftX, topY, rightX, bottomY, escTime);
         }
 
         private void HandleRecursiveCase(int leftX, int topY, int rightX, int bottomY)
