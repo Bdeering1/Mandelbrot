@@ -19,6 +19,11 @@ namespace Mandelbrot.Server.Core
         private int tolerance = 2;
         private bool overlap = true;
 
+        private List<Task> tasks = new();
+        private int tasksStarted = 0;
+        private int tasksCompleted = 0;
+        private int maxTasks = 5;
+
         private bool showRects = false;
         private int rectsCalculated = 0;
         private int pxCalculated = 0;
@@ -40,33 +45,7 @@ namespace Mandelbrot.Server.Core
         }
         public async Task<SKBitmap> GetBitmap()
         {
-            /*
-            750x750 image:
-            
-            Parallel Naive algo
-            0 rectangles used
-            561775 pixels calculated(99.87 %)
-            10.641s elapsed
-
-            Parallel Rects algo
-            5168 rectangles used
-            58512 pixels calculated (10.4%)
-            3.503s elapsed
-
-            2500x2500 image:
-
-            Parallel Naive algo
-            0 rectangles used
-            6238129 pixels calculated (99.81%)
-            85.18s elapsed
-
-            Parallel Rects algo
-            15416 rectangles used
-            350054 pixels calculated (5.6%)
-            34.204s elapsed
-            */
-
-            await ComputeSetNaivelyParallel();
+            await ComputeSetRecursiveRectanglesParallel();
             await Task.Yield();
 
             var imgInfo = new SKImageInfo(width, height, SKColorType.Rgba8888, SKAlphaType.Opaque);
@@ -104,34 +83,43 @@ namespace Mandelbrot.Server.Core
 
         private async Task ComputeSetRecursiveRectanglesParallel()
         {
-            var numDivisions = 15;
+            var numDivisions = 20;
             var xDim = width / (float)numDivisions;
             var yDim = height / (float)numDivisions;
 
-            var taskList = new List<Task>();
-            int tasks = 0;
-            int tasksFinished = 0;
-
-            for (int i = 0; i < numDivisions; i++)
+            for (int x = 0; x < numDivisions; x++)
             {
-                int newI = i;
-                for (int j = 0; j < numDivisions; j++)
+                int newX = x;
+                for (int y = 0; y < numDivisions; y++)
                 {
-                    int newJ = j;
-                    tasks++;
-                    taskList.Add(Task.Run(() =>
-                    {
-                        ComputeRectangleRecursively((int)(newI * xDim),
-                                                (int)(newJ * yDim),
-                                                (int)(newI * xDim + xDim - 1),
-                                                (int)(newJ * yDim + yDim - 1));
-                        tasksFinished++;
-                        Console.WriteLine(tasksFinished + "/" + (i * j));
-                    }));
+                    int newY = y;
+                    ComputeRectangleRecursivelyThreadOption((int)(newX * xDim),
+                                                            (int)(newY * yDim),
+                                                            (int)(newX * xDim + xDim - 1),
+                                                            (int)(newY * yDim + yDim - 1));
                 }
             }
-            Console.WriteLine(tasks + " threads started");
-            await Task.WhenAll(taskList);
+            await Task.Yield();
+            await Task.WhenAll(tasks);
+            Console.WriteLine($"Max threads: {maxTasks} Threads completed: {tasksCompleted}");
+        }
+
+        private void ComputeRectangleRecursivelyThreadOption(int leftX, int topY, int rightX, int bottomY)
+        {
+            if (tasksStarted - tasksCompleted < maxTasks)
+            {
+                tasksStarted++;
+                tasks.Add(Task.Run(() =>
+                {
+                    Console.WriteLine($"{tasksStarted - tasksCompleted}/{maxTasks} ({tasksCompleted} total)");
+                    ComputeRectangleRecursively(leftX, topY, rightX, bottomY);
+                    tasksCompleted++;
+                }));
+            }
+            else
+            {
+                ComputeRectangleRecursively(leftX, topY, rightX, bottomY);
+            }
         }
 
         private void ComputeRectangleRecursively(int leftX, int topY, int rightX, int bottomY)
@@ -173,10 +161,10 @@ namespace Mandelbrot.Server.Core
             {
                 var xDim = (rightX - leftX + 1) / 2;
                 var yDim = (bottomY - topY + 1) / 2;
-                ComputeRectangleRecursively(leftX, topY, leftX + xDim, topY + yDim);
-                ComputeRectangleRecursively(leftX + xDim, topY, rightX, topY + yDim);
-                ComputeRectangleRecursively(leftX, topY + yDim, leftX + xDim, bottomY);
-                ComputeRectangleRecursively(leftX + xDim, topY + yDim, rightX, bottomY);
+                ComputeRectangleRecursivelyThreadOption(leftX, topY, leftX + xDim, topY + yDim);
+                ComputeRectangleRecursivelyThreadOption(leftX + xDim, topY, rightX, topY + yDim);
+                ComputeRectangleRecursivelyThreadOption(leftX, topY + yDim, leftX + xDim, bottomY);
+                ComputeRectangleRecursivelyThreadOption(leftX + xDim, topY + yDim, rightX, bottomY);
                 rectsCalculated += 4;
             }
             else
