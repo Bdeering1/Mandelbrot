@@ -9,6 +9,11 @@ namespace Mandelbrot.Shared.Configuration
         public const int IMAGE_WIDTH = 750;
         public const int IMAGE_HEIGHT = 750;
 
+        public const int COLOR_TOLERANCE = 5;
+        public const int MAX_THREADS = 7;
+
+        public static bool Overlap = true;
+
         public static BigComplex DefaultCameraPosition { get; } = BigComplex.Origin;
         public static double DefaultCameraZoom { get; } = 1.0;
 

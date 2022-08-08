@@ -16,13 +16,9 @@ namespace Mandelbrot.Server.Core
         private uint[] bytes { get; set; }
         private uint[] escapeTimes { get; set; }
 
-        private int tolerance = 2;
-        private bool overlap = true;
-
         private List<Task> tasks = new();
-        private int tasksStarted = 0;
-        private int tasksCompleted = 0;
-        private int maxTasks = 5;
+        private int tasksStarted;
+        private int tasksCompleted;
 
         private bool showRects = false;
         private int rectsCalculated = 0;
@@ -42,7 +38,11 @@ namespace Mandelbrot.Server.Core
                     bytes[y * width + x] = 0xff00ff;
                 }
             }
+
+            tasksStarted = int.MaxValue;
+            tasksCompleted = 0;
         }
+
         public async Task<SKBitmap> GetBitmap()
         {
             await ComputeSetRecursiveRectanglesParallel();
@@ -63,9 +63,10 @@ namespace Mandelbrot.Server.Core
 
             return bitmap;
         }
+
         private void ComputeSetRecursiveRectangles()
         {
-            var numDivisions = 15;
+            var numDivisions = 20;
             var xDim = width / (float)numDivisions;
             var yDim = height / (float)numDivisions;
 
@@ -86,6 +87,7 @@ namespace Mandelbrot.Server.Core
             var numDivisions = 20;
             var xDim = width / (float)numDivisions;
             var yDim = height / (float)numDivisions;
+            tasksStarted = 0;
 
             for (int x = 0; x < numDivisions; x++)
             {
@@ -101,17 +103,17 @@ namespace Mandelbrot.Server.Core
             }
             await Task.Yield();
             await Task.WhenAll(tasks);
-            Console.WriteLine($"Max threads: {maxTasks} Threads completed: {tasksCompleted}");
+            Console.WriteLine($"Max threads: {Config.MAX_THREADS} Threads completed: {tasksCompleted}");
         }
 
         private void ComputeRectangleRecursivelyThreadOption(int leftX, int topY, int rightX, int bottomY)
         {
-            if (tasksStarted - tasksCompleted < maxTasks)
+            if (tasksStarted - tasksCompleted < Config.MAX_THREADS)
             {
                 tasksStarted++;
                 tasks.Add(Task.Run(() =>
                 {
-                    Console.WriteLine($"{tasksStarted - tasksCompleted}/{maxTasks} ({tasksCompleted} total)");
+                    //Console.WriteLine($"{tasksStarted - tasksCompleted}/{maxTasks} ({tasksCompleted} total)");
                     ComputeRectangleRecursively(leftX, topY, rightX, bottomY);
                     tasksCompleted++;
                 }));
@@ -135,8 +137,8 @@ namespace Mandelbrot.Server.Core
             var escTime = ComputePixelValue(leftX + w/2, topY + h/2);
             for (int x = leftX; x <= rightX; x += 2)
             {
-                if (Math.Abs(ComputePixelValue(x, topY) - escTime) > tolerance
-                    || Math.Abs(ComputePixelValue(x, bottomY) - escTime) > tolerance)
+                if (Math.Abs(ComputePixelValue(x, topY) - escTime) > Config.COLOR_TOLERANCE
+                    || Math.Abs(ComputePixelValue(x, bottomY) - escTime) > Config.COLOR_TOLERANCE)
                 {
                     HandleRecursiveCase(leftX, topY, rightX, bottomY);
                     return;
@@ -144,8 +146,8 @@ namespace Mandelbrot.Server.Core
             }
             for (int y = topY + 1; y < bottomY; y += 2)
             {
-                if (Math.Abs(ComputePixelValue(leftX, y) - escTime) > tolerance
-                    || Math.Abs(ComputePixelValue(rightX, y) - escTime) > tolerance)
+                if (Math.Abs(ComputePixelValue(leftX, y) - escTime) > Config.COLOR_TOLERANCE
+                    || Math.Abs(ComputePixelValue(rightX, y) - escTime) > Config.COLOR_TOLERANCE)
                 {
                     HandleRecursiveCase(leftX, topY, rightX, bottomY);
                     return;
@@ -157,7 +159,7 @@ namespace Mandelbrot.Server.Core
 
         private void HandleRecursiveCase(int leftX, int topY, int rightX, int bottomY)
         {
-            if (overlap)
+            if (Config.Overlap)
             {
                 var xDim = (rightX - leftX + 1) / 2;
                 var yDim = (bottomY - topY + 1) / 2;
@@ -171,10 +173,10 @@ namespace Mandelbrot.Server.Core
             {
                 var xDim = (rightX - leftX + 1) / 2;
                 var yDim = (bottomY - topY + 1) / 2;
-                ComputeRectangleRecursively(leftX, topY, leftX + xDim - 1, topY + yDim - 1);
-                ComputeRectangleRecursively(leftX + xDim, topY, rightX, topY + yDim - 1);
-                ComputeRectangleRecursively(leftX, topY + yDim, leftX + xDim - 1, bottomY);
-                ComputeRectangleRecursively(leftX + xDim, topY + yDim, rightX, bottomY);
+                ComputeRectangleRecursivelyThreadOption(leftX, topY, leftX + xDim - 1, topY + yDim - 1);
+                ComputeRectangleRecursivelyThreadOption(leftX + xDim, topY, rightX, topY + yDim - 1);
+                ComputeRectangleRecursivelyThreadOption(leftX, topY + yDim, leftX + xDim - 1, bottomY);
+                ComputeRectangleRecursivelyThreadOption(leftX + xDim, topY + yDim, rightX, bottomY);
                 rectsCalculated += 4;
             }
         }
