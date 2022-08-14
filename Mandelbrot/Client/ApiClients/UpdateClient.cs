@@ -1,7 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.SignalR.Client;
-using SkiaSharp;
 
 namespace Mandelbrot.Client.ApiClients
 {
@@ -9,7 +8,7 @@ namespace Mandelbrot.Client.ApiClients
     {
         private HubConnection connection { get; }
 
-        public event Action<string> OnBitmapReceived;
+        public event Action<string> OnImageReceived;
 
         public UpdateClient(NavigationManager navigationManager)
         {
@@ -23,7 +22,7 @@ namespace Mandelbrot.Client.ApiClients
                 })
                 .Build();
 
-            connection.On<string>("ReceiveBitmap", BitmapReceived);
+            connection.On<string>("ReceiveImage", ImageReceived);
 
             connection.StartAsync();
         }
@@ -36,14 +35,9 @@ namespace Mandelbrot.Client.ApiClients
             await connection.StopAsync();
         }
 
-        public async Task SendRequest()
+        private void ImageReceived(string bitmap)
         {
-            await connection.SendAsync("SendRequest"); // attach zoom/pos values heree
-        }
-
-        private void BitmapReceived(string bitmap)
-        {
-            OnBitmapReceived?.Invoke(bitmap);
+            OnImageReceived?.Invoke(bitmap);
         }
     }
 }

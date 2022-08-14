@@ -15,19 +15,20 @@ else
 
 
 @code {
-    [Inject] UpdateClient client { get; set; }
+    [Inject] ApiClient apiClient { get; set; }
+    [Inject] UpdateClient updateClient { get; set; }
 
     private string bitmap;
 
     protected override async Task OnInitializedAsync()
     {
-        client.OnBitmapReceived += (bm) =>
+        updateClient.OnImageReceived += (bm) =>
         {
             bitmap = bm;
             Console.WriteLine($"Bitmap string: {bitmap}");
             StateHasChanged();
         };
 
-        await client.SendRequest();
+        await apiClient.SendImageRequest();
     }
 }

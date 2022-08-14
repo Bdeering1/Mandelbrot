@@ -1,7 +1,4 @@
-﻿using SkiaSharp;
-using System.Net.Http.Json;
-using System.Text.Json;
-using System.Text.Json.Serialization;
+﻿using System.Net.Http.Json;
 
 namespace Mandelbrot.Client.ApiClients
 {
@@ -12,6 +9,11 @@ namespace Mandelbrot.Client.ApiClients
         public ApiClient(HttpClient http)
         {
             this.http = http;
+        }
+
+        public async Task SendImageRequest()
+        {
+            await http.PostAsJsonAsync("image", "");
         }
     }
 }

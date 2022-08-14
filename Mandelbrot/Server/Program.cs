@@ -65,6 +65,7 @@ public class Program
     {
         collection.AddSingleton<Camera>();
         collection.AddSingleton<SetGenerator>();
+        collection.AddSingleton<UpdateHub>();
     }
 }
 

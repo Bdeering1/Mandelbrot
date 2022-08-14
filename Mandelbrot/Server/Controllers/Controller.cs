@@ -1,6 +1,8 @@
-﻿using System.Drawing;
-using Mandelbrot.Core;
+﻿using System.Diagnostics;
 using Mandelbrot.Server.Core;
+using Mandelbrot.Server.Hubs;
+using Mandelbrot.Shared.Configuration;
+using Mandelbrot.Shared.Models;
 using Microsoft.AspNetCore.Mvc;
 using SkiaSharp;
 
@@ -10,11 +12,35 @@ namespace Mandelbrot.Server.Controllers;
 [Route("[controller]")]
 public class Controller : ControllerBase
 {
-    private readonly ILogger<Controller> logger;
 
-    public Controller(ILogger<Controller> logger)
+    private SetGenerator generator { get; }
+    private UpdateHub hub { get; }
+    private ILogger<Controller> logger { get; }
+
+    public Controller(SetGenerator generator, UpdateHub hub, ILogger<Controller> logger)
     {
         this.logger = logger;
+        this.generator = generator;
+        this.hub = hub;
+    }
+
+    [HttpPost]
+    [Route("image")]
+    public async Task ImageRequest()
+    {
+        SyncRunningParamters();
+
+        var s = new Stopwatch();
+        s.Start();
+        var set = Convert.ToBase64String((await generator.GetBitmap()).Encode(SKEncodedImageFormat.Png, 100).ToArray());
+        s.Stop();
+        Console.WriteLine($"{s.ElapsedMilliseconds / 1000.0}s elapsed");
+
+        await hub.SendImage(set);
+    }
+
+    private static void SyncRunningParamters()
+    {
+        BigDecimal.Precision = Config.Precision;
     }
 }
-
