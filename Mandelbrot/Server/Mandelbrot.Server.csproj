@@ -18,12 +18,4 @@
     <ProjectReference Include="..\Client\Mandelbrot.Client.csproj" />
     <ProjectReference Include="..\Shared\Mandelbrot.Shared.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <None Remove="Hubs\" />
-    <None Remove="Configuration\" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Hubs\" />
-    <Folder Include="Configuration\" />
-  </ItemGroup>
 </Project>
