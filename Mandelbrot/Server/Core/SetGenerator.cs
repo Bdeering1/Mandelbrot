@@ -12,6 +12,7 @@ namespace Mandelbrot.Server.Core
         private int height { get; } = Config.IMAGE_HEIGHT;
         private List<Color> colors { get; set; } = Config.Colors;
 
+        public EscapeTime escapeTime { get; }
         private Camera camera { get; }
         private uint[] bytes { get; set; }
         private uint[] escapeTimes { get; set; }
@@ -20,12 +21,12 @@ namespace Mandelbrot.Server.Core
         private int tasksStarted;
         private int tasksCompleted;
 
-        private bool showRects = false;
         private int rectsCalculated = 0;
         private int pxCalculated = 0;
 
-        public SetGenerator(Camera camera)
+        public SetGenerator(EscapeTime escapeTime, Camera camera)
         {
+            this.escapeTime = escapeTime;
             this.camera = camera;
 
             bytes = new uint[width * height];
@@ -66,7 +67,7 @@ namespace Mandelbrot.Server.Core
 
         private void ComputeSetRecursiveRectangles()
         {
-            var numDivisions = 20;
+            var numDivisions = Config.InitialDivisions;
             var xDim = width / (float)numDivisions;
             var yDim = height / (float)numDivisions;
 
@@ -84,7 +85,7 @@ namespace Mandelbrot.Server.Core
 
         private async Task ComputeSetRecursiveRectanglesParallel()
         {
-            var numDivisions = 20;
+            var numDivisions = Config.InitialDivisions;
             var xDim = width / (float)numDivisions;
             var yDim = height / (float)numDivisions;
             tasksStarted = 0;
@@ -241,10 +242,10 @@ namespace Mandelbrot.Server.Core
             {
                 for(int y = topY; y <= bottomY; y++)
                 {
-                    if (showRects && (x == leftX || x == rightX || y == topY || y == bottomY))
+                    if (Config.ShowRects && (x == leftX || x == rightX || y == topY || y == bottomY))
                     {
-                        bytes[y * width + x] = 0x00ff00;
                         escapeTimes[y * width + x] = escTime;
+                        bytes[y * width + x] = 0x00ff00;
                         continue;
                     }
                     escapeTimes[y * width + x] = escTime;
@@ -260,7 +261,7 @@ namespace Mandelbrot.Server.Core
                 for (int y = topY; y <= bottomY; y++)
                 {
                     ComputePixelValue(x, y);
-                    if (showRects && (x == leftX || x == rightX || y == topY || y == bottomY))
+                    if (Config.ShowRects && (x == leftX || x == rightX || y == topY || y == bottomY))
                     {
                         bytes[y * width + x] = 0x00ff00;
                     }
@@ -278,14 +279,14 @@ namespace Mandelbrot.Server.Core
 
             pxCalculated++;
             var complexPos = camera.GetComplexPos(x, y);
-            if (CheckShapes(complexPos))
+            if (escapeTime.CheckShapes(complexPos))
             {
                 bytes[pixelPos] = 0;
                 escapeTimes[pixelPos] = Config.MaxIterations;
                 return Config.MaxIterations;
             }
 
-            var escTime = CalcEscapeTime(complexPos);
+            var escTime = escapeTime.CalcEscapeTime(complexPos);
             var c = colors[(int)escTime - 1];
             bytes[pixelPos] = (uint)((c.A << 24) | (c.B << 16) | (c.G << 8) | (c.R << 0));
             escapeTimes[pixelPos] = escTime;
@@ -325,38 +326,6 @@ namespace Mandelbrot.Server.Core
                 bitmapCanvas.DrawLine(new SKPoint(0, centerY + yDif), new SKPoint(width, centerY + yDif), paint);
                 yDif += gridSpacing;
             }
-        }
-
-        private static uint CalcEscapeTime(BigComplex pt)
-        {
-            var constant = new BigComplex(pt.r, pt.i);
-            var current = BigComplex.Origin;
-
-            var rSquared = (BigDecimal)0;
-            var iSquared = (BigDecimal)0;
-
-            uint iter = 0;
-            while (rSquared + iSquared <= new BigDecimal(4) && iter < Config.MaxIterations)
-            {
-                current = new BigComplex(rSquared - iSquared, current.r * current.i + current.i * current.r) + constant;
-                rSquared = current.r * current.r;
-                iSquared = current.i * current.i;
-                iter++;
-            }
-            return iter;
-        }
-
-        private static bool CheckShapes(BigComplex pos)
-        {
-            var iSquared = pos.i * pos.i;
-            var a = pos.r - (BigDecimal)0.25;
-            var q = a * a + iSquared;
-            if (q * (q + a) < iSquared * (BigDecimal)0.25
-                || (pos.r * pos.r) + ((BigDecimal)2 * pos.r) + (BigDecimal)1 + iSquared < (BigDecimal)0.0625)
-            {
-                return true;
-            }
-            return false;
         }
     }
 }
