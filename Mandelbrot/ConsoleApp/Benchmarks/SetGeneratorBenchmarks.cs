@@ -1,7 +1,8 @@
 ﻿using BenchmarkDotNet.Attributes;
 using Mandelbrot.Server.Core;
+using Microsoft.Extensions.DependencyInjection;
 
-namespace Mandelbrot.Console.Benchmarks
+namespace Mandelbrot.ConsoleApp.Benchmarks
 {
     [MemoryDiagnoser]
     //[Orderer(SummaryOrderPolicy.FastestToSlowest)]
@@ -10,11 +11,16 @@ namespace Mandelbrot.Console.Benchmarks
     {
         public SetGenerator generator { get; }
 
-        public SetGeneratorBenchmarks(SetGenerator generator)
+        public SetGeneratorBenchmarks()
         {
-            this.generator = generator;
-        }
+            var services = new ServiceCollection();
+            services.AddSingleton<Camera>();
+            services.AddSingleton<EscapeTime>();
+            services.AddSingleton<SetGenerator>();
+            var container = services.BuildServiceProvider();
 
+            generator = container.GetService<SetGenerator>();
+        }
 
         [Benchmark]
         public async Task GetBitmap()
@@ -24,3 +30,4 @@ namespace Mandelbrot.Console.Benchmarks
     }
 }
 
+    

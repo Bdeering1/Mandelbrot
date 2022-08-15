@@ -12,7 +12,7 @@ namespace Mandelbrot.Server.Core
         private int height { get; } = Config.IMAGE_HEIGHT;
         private List<Color> colors { get; set; } = Config.Colors;
 
-        public EscapeTime escapeTime { get; }
+        private EscapeTime escapeTime { get; }
         private Camera camera { get; }
         private uint[] bytes { get; set; }
         private uint[] escapeTimes { get; set; }

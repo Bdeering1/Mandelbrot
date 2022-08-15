@@ -1,15 +1,5 @@
-﻿using Mandelbrot.Server.Core;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-
-using IHost host = Host.CreateDefaultBuilder(args)
-    .ConfigureServices((_, services) =>
-        services.AddSingleton<Camera>()
-            .AddSingleton<EscapeTime>()
-            .AddSingleton<SetGenerator>()
-    ).Build();
+﻿using BenchmarkDotNet.Running;
+using Mandelbrot.ConsoleApp.Benchmarks;
 
 
-await host.RunAsync();
-
-//BenchmarkRunner.Run<SetGeneratorBenchmarks>();
+BenchmarkRunner.Run<SetGeneratorBenchmarks>();
