@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Server\Mandelbrot.Server.csproj" />
+    <ProjectReference Include="..\Shared\Mandelbrot.Shared.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="Benchmarks\" />
+    <None Remove="BenchmarkDotNet" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Benchmarks\" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="BenchmarkDotNet" Version="0.13.1" />
+  </ItemGroup>
+</Project>

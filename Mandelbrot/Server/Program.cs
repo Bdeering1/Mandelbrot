@@ -58,8 +58,8 @@ app.Run();
 static void ConfigureServices(IServiceCollection collection)
 {
     collection.AddSingleton<Camera>();
-    collection.AddSingleton<SetGenerator>();
     collection.AddSingleton<EscapeTime>();
+    collection.AddSingleton<SetGenerator>();
     collection.AddSingleton<UpdateHub>();
 }
 
