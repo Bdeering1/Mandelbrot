@@ -17,7 +17,6 @@ namespace Mandelbrot.Server.Core
         private uint[] bytes { get; set; }
         private uint[] escapeTimes { get; set; }
 
-        private List<Task> tasks = new();
         private int tasksStarted;
         private int tasksCompleted;
 
@@ -103,7 +102,6 @@ namespace Mandelbrot.Server.Core
                 }
             }
             await Task.Yield();
-            await Task.WhenAll(tasks);
             Console.WriteLine($"Max threads: {Config.MAX_THREADS} Threads completed: {tasksCompleted}");
         }
 
@@ -111,9 +109,9 @@ namespace Mandelbrot.Server.Core
         {
             if (tasksStarted - tasksCompleted < Config.MAX_THREADS)
             {
-                tasksStarted++;
-                tasks.Add(Task.Run(() =>
+                ThreadPool.QueueUserWorkItem(new WaitCallback((object? obj) =>
                 {
+                    tasksStarted++;
                     //Console.WriteLine($"{tasksStarted - tasksCompleted}/{maxTasks} ({tasksCompleted} total)");
                     ComputeRectangleRecursively(leftX, topY, rightX, bottomY);
                     tasksCompleted++;
