@@ -19,14 +19,21 @@ else
     [Inject] UpdateClient updateClient { get; set; }
 
     private string bitmap;
+    private bool firstReceived = true;
 
     protected override async Task OnInitializedAsync()
     {
-        updateClient.OnImageReceived += (bm) =>
+        updateClient.OnImageReceived += async (bm) =>
         {
             bitmap = bm;
             Console.WriteLine($"Bitmap string: {bitmap}");
             StateHasChanged();
+
+            if (firstReceived)
+            {
+                firstReceived = false;
+                await apiClient.SendImageRequest();
+            }
         };
 
         await apiClient.SendImageRequest();

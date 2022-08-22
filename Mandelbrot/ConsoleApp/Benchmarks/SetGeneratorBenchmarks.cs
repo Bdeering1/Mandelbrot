@@ -1,12 +1,13 @@
 ﻿using BenchmarkDotNet.Attributes;
+using BenchmarkDotNet.Order;
 using Mandelbrot.Server.Core;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Mandelbrot.ConsoleApp.Benchmarks
 {
     [MemoryDiagnoser]
-    //[Orderer(SummaryOrderPolicy.FastestToSlowest)]
-    //[RankColumn]
+    [Orderer(SummaryOrderPolicy.FastestToSlowest)]
+    [RankColumn]
     public class SetGeneratorBenchmarks
     {
         public SetGenerator generator { get; }
@@ -25,7 +26,10 @@ namespace Mandelbrot.ConsoleApp.Benchmarks
         [Benchmark]
         public async Task GetBitmap()
         {
-            await generator.GetBitmap();
+            for (int i = 0; i < 100; i++)
+            {
+                await generator.GetBitmap();
+            }
         }
     }
 }

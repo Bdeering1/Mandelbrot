@@ -35,6 +35,7 @@ public class Controller : ControllerBase
         var set = Convert.ToBase64String((await generator.GetBitmap()).Encode(SKEncodedImageFormat.Png, 100).ToArray());
         s.Stop();
         Console.WriteLine($"{s.ElapsedMilliseconds / 1000.0}s elapsed");
+        generator.Reset();
 
         await hub.SendImage(set);
     }

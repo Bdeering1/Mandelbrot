@@ -64,6 +64,17 @@ namespace Mandelbrot.Server.Core
             return bitmap;
         }
 
+        public void Reset()
+        {
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    escapeTimes[y * width + x] = default;
+                }
+            }
+        }
+
         private void ComputeSetRecursiveRectangles()
         {
             var numDivisions = Config.InitialDivisions;
