@@ -12,7 +12,8 @@ else
         <img src=@($"data:image/jpeg;base64,{bitmap}")/>
     </div>
 }
-
+<p>@count</p>
+<p>hello</p>
 
 @code {
     [Inject] ApiClient apiClient { get; set; }
@@ -20,13 +21,14 @@ else
 
     private string bitmap;
     private bool firstReceived = true;
+    private int count = 0;
 
     protected override async Task OnInitializedAsync()
     {
         updateClient.OnImageReceived += async (bm) =>
         {
+            Console.WriteLine($"Image received");
             bitmap = bm;
-            Console.WriteLine($"Bitmap string: {bitmap}");
             StateHasChanged();
 
             if (firstReceived)
@@ -36,6 +38,7 @@ else
             }
         };
 
-        await apiClient.SendImageRequest();
+        //await apiClient.SendImageRequest();
+        count = (new Random()).Next(1, 100);
     }
 }

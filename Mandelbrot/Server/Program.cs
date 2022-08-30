@@ -10,7 +10,11 @@ builder.Services.AddControllersWithViews().AddJsonOptions(options =>
     options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve;
     options.JsonSerializerOptions.PropertyNamingPolicy = null;
 });
-builder.Services.AddRazorPages();
+var mvcBuilder = builder.Services.AddRazorPages();
+if (builder.Environment.IsDevelopment())
+{
+    mvcBuilder.AddRazorRuntimeCompilation();
+}
 
 builder.Services.AddSignalR().AddJsonProtocol(options =>
 {
