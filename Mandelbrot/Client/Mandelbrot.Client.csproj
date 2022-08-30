@@ -20,6 +20,7 @@
     <PackageReference Include="SkiaSharp" Version="2.88.0" />
     <PackageReference Include="SkiaSharp.Views.Blazor" Version="2.88.0" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="6.0.7" />
+    <PackageReference Include="MudBlazor" Version="6.0.14" />
   </ItemGroup>
 
   <ItemGroup>
@@ -28,12 +29,5 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Shared\Mandelbrot.Shared.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Remove="Microsoft.AspNetCore.SignalR.Client" />
-    <None Remove="ApiClients\" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="ApiClients\" />
   </ItemGroup>
 </Project>

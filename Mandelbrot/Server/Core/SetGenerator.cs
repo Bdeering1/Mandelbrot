@@ -10,7 +10,6 @@ namespace Mandelbrot.Server.Core
     {
         private int width { get; } = Config.IMAGE_WIDTH;
         private int height { get; } = Config.IMAGE_HEIGHT;
-        private List<Color> colors { get; set; } = Config.Colors;
 
         private EscapeTime escapeTime { get; }
         private Camera camera { get; }
@@ -244,7 +243,7 @@ namespace Mandelbrot.Server.Core
 
         private void FillRect(int leftX, int topY, int rightX, int bottomY, uint escTime)
         {
-            var c = colors[(int)escTime - 1];
+            var c = Config.Colors[(int)escTime - 1];
             uint col = (uint)((c.A << 24) | (c.B << 16) | (c.G << 8) | (c.R << 0));
 
             for(int x = leftX; x <= rightX; x++)
@@ -296,7 +295,7 @@ namespace Mandelbrot.Server.Core
             }
 
             var escTime = escapeTime.CalcEscapeTime(complexPos);
-            var c = colors[(int)escTime - 1];
+            var c = Config.Colors[(int)escTime - 1];
             bytes[pixelPos] = (uint)((c.A << 24) | (c.B << 16) | (c.G << 8) | (c.R << 0));
             escapeTimes[pixelPos] = escTime;
 

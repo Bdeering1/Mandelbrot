@@ -12,8 +12,6 @@ else
         <img src=@($"data:image/jpeg;base64,{bitmap}")/>
     </div>
 }
-<p>@count</p>
-<p>hello</p>
 
 @code {
     [Inject] ApiClient apiClient { get; set; }
@@ -21,7 +19,6 @@ else
 
     private string bitmap;
     private bool firstReceived = true;
-    private int count = 0;
 
     protected override async Task OnInitializedAsync()
     {
@@ -38,7 +35,6 @@ else
             }
         };
 
-        //await apiClient.SendImageRequest();
-        count = (new Random()).Next(1, 100);
+        await apiClient.SendImageRequest();
     }
 }

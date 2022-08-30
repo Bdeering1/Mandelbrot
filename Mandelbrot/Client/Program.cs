@@ -1,6 +1,7 @@
 ﻿using Mandelbrot.Client.ApiClients;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+using MudBlazor.Services;
 
 namespace Mandelbrot.Client;
 
@@ -13,6 +14,7 @@ public class Program
         builder.RootComponents.Add<HeadOutlet>("head::after");
 
         builder.Services.AddSingleton(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
+        builder.Services.AddMudServices();
 
         builder.Services.AddSingleton<ApiClient>();
         builder.Services.AddSingleton<UpdateClient>();
