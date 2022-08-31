@@ -28,6 +28,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Shared\Mandelbrot.Shared.csproj" />
+    <ProjectReference Include="..\Shared\Mandelbrot.Shared.csproj">
+      <ReferenceSourceTarget>ProjectReference</ReferenceSourceTarget>
+      <GlobalPropertiesToRemove>;WebPublishProfileFile</GlobalPropertiesToRemove>
+    </ProjectReference>
   </ItemGroup>
 </Project>

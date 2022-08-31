@@ -168,7 +168,7 @@ namespace Mandelbrot.Server.Core
 
         private void HandleRecursiveCase(int leftX, int topY, int rightX, int bottomY)
         {
-            if (Config.Overlap)
+            if (Config.RectOverlap)
             {
                 var xDim = (rightX - leftX + 1) / 2;
                 var yDim = (bottomY - topY + 1) / 2;

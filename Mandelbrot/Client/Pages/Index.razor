@@ -1,15 +1,16 @@
 ﻿@page "/"
 
 @using Mandelbrot.Client.ApiClients;
+@using Mandelbrot.Shared.DTOs;
 
-@if (String.IsNullOrWhiteSpace(bitmap))
+@if (dto is null || String.IsNullOrWhiteSpace(dto.Image))
 {
     <p>No data...</p>
 }
 else
 {
     <div style="height:100%; display: flex; justify-content: center; align-items: center;">
-        <img src=@($"data:image/jpeg;base64,{bitmap}")/>
+        <img src=@($"data:image/jpeg;base64,{dto.Image}")/>
     </div>
 }
 
@@ -17,15 +18,15 @@ else
     [Inject] ApiClient apiClient { get; set; }
     [Inject] UpdateClient updateClient { get; set; }
 
-    private string bitmap;
+    private ImageDto dto;
     private bool firstReceived = true;
 
     protected override async Task OnInitializedAsync()
     {
-        updateClient.OnImageReceived += async (bm) =>
+        updateClient.OnImageReceived += async (dto) =>
         {
             Console.WriteLine($"Image received");
-            bitmap = bm;
+            this.dto = dto;
             StateHasChanged();
 
             if (firstReceived)

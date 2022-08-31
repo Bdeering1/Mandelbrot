@@ -15,12 +15,12 @@ namespace Mandelbrot.Shared.Configuration
         public static int Precision { get; } = 20;
         public static uint MaxIterations { get; } = 40;
 
-        public static bool Overlap = true;
-        public static int InitialDivisions = 20;
-        public static bool ShowRects = false;
+        public static BigComplex Position { get; } = BigComplex.Origin;
+        public static double Zoom { get; } = 1.0;
 
-        public static BigComplex DefaultCameraPosition { get; } = BigComplex.Origin;
-        public static double DefaultCameraZoom { get; } = 1.0;
+        public static bool RectOverlap { get; } = true;
+        public static int InitialDivisions { get; } = 20;
+        public static bool ShowRects { get; } = false;
 
         public static List<Color> Colors { get; } = ColorGenerator.GetBernsteinGradients();
     }

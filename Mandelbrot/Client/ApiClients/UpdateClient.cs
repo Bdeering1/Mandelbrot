@@ -1,4 +1,5 @@
 ﻿using System.Text.Json.Serialization;
+using Mandelbrot.Shared.DTOs;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.SignalR.Client;
 
@@ -8,7 +9,7 @@ namespace Mandelbrot.Client.ApiClients
     {
         private HubConnection connection { get; }
 
-        public event Action<string> OnImageReceived;
+        public event Action<ImageDto> OnImageReceived;
 
         public UpdateClient(NavigationManager navigationManager)
         {
@@ -22,7 +23,7 @@ namespace Mandelbrot.Client.ApiClients
                 })
                 .Build();
 
-            connection.On<string>("ReceiveImage", ImageReceived);
+            connection.On<ImageDto>("ReceiveImage", ImageReceived);
 
             connection.StartAsync();
         }
@@ -35,9 +36,9 @@ namespace Mandelbrot.Client.ApiClients
             await connection.StopAsync();
         }
 
-        private void ImageReceived(string bitmap)
+        private void ImageReceived(ImageDto dto)
         {
-            OnImageReceived?.Invoke(bitmap);
+            OnImageReceived?.Invoke(dto);
         }
     }
 }

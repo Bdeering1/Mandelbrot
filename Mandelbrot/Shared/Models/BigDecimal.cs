@@ -87,6 +87,15 @@ namespace Mandelbrot.Shared.Models
 
         public static explicit operator BigDecimal(decimal num) => new(num);
 
+        public static explicit operator float(BigDecimal value) =>
+            Convert.ToSingle((double)value);
+
+        public static explicit operator double(BigDecimal value) =>
+            (double)value.Significand * Math.Pow(10, value.Exponent);
+
+        public static explicit operator decimal(BigDecimal value) =>
+            (decimal)value.Significand * (decimal)Math.Pow(10, value.Exponent);
+
 
         public static BigDecimal operator -(BigDecimal a)
         {

@@ -2,6 +2,7 @@
 using Mandelbrot.Server.Core;
 using Mandelbrot.Server.Hubs;
 using Mandelbrot.Shared.Configuration;
+using Mandelbrot.Shared.DTOs;
 using Mandelbrot.Shared.Models;
 using Microsoft.AspNetCore.Mvc;
 using SkiaSharp;
@@ -33,11 +34,12 @@ public class Controller : ControllerBase
 
         var s = new Stopwatch();
         s.Start();
-        var set = Convert.ToBase64String((await generator.GetBitmap()).Encode(SKEncodedImageFormat.Png, 100).ToArray());
+        var image = Convert.ToBase64String((await generator.GetBitmap()).Encode(SKEncodedImageFormat.Png, 100).ToArray());
         s.Stop();
         Console.WriteLine($"{s.ElapsedMilliseconds / 1000.0}s elapsed");
 
-        await hub.SendImage(set);
+        var dto = new ImageDto(image, (double)Config.Position.r, (double)Config.Position.i, Config.Zoom, Config.Precision, Config.MaxIterations);
+        await hub.SendImage(dto);
     }
 
     private static void SyncRunningParamters()
