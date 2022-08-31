@@ -17,8 +17,8 @@ namespace Mandelbrot.Server.Core
 
         public Camera()
         {
-            imageSizeX = Config.IMAGE_WIDTH;
-            imageSizeY = Config.IMAGE_HEIGHT;
+            imageSizeX = Config.ImageWidth;
+            imageSizeY = Config.ImageHeight;
             position = Config.Position;
             zoom = Config.Zoom;
 

@@ -8,8 +8,8 @@ namespace Mandelbrot.Server.Core
 {
     public class SetGenerator
     {
-        private int width { get; } = Config.IMAGE_WIDTH;
-        private int height { get; } = Config.IMAGE_HEIGHT;
+        private int width { get; } = Config.ImageWidth;
+        private int height { get; } = Config.ImageHeight;
 
         private EscapeTime escapeTime { get; }
         private Camera camera { get; }
@@ -112,12 +112,12 @@ namespace Mandelbrot.Server.Core
                 }
             }
             await Task.Yield();
-            Console.WriteLine($"Max threads: {Config.MAX_THREADS} Threads completed: {tasksCompleted}");
+            Console.WriteLine($"Max threads: {Config.MaxThreads} Threads completed: {tasksCompleted}");
         }
 
         private void ComputeRectangleRecursivelyThreadOption(int leftX, int topY, int rightX, int bottomY)
         {
-            if (tasksStarted - tasksCompleted < Config.MAX_THREADS)
+            if (tasksStarted - tasksCompleted < Config.MaxThreads)
             {
                 ThreadPool.QueueUserWorkItem(new WaitCallback((object? obj) =>
                 {
@@ -146,8 +146,8 @@ namespace Mandelbrot.Server.Core
             var escTime = ComputePixelValue(leftX + w/2, topY + h/2);
             for (int x = leftX; x <= rightX; x += 2)
             {
-                if (Math.Abs(ComputePixelValue(x, topY) - escTime) > Config.COLOR_TOLERANCE
-                    || Math.Abs(ComputePixelValue(x, bottomY) - escTime) > Config.COLOR_TOLERANCE)
+                if (Math.Abs(ComputePixelValue(x, topY) - escTime) > Config.ColorTolerance
+                    || Math.Abs(ComputePixelValue(x, bottomY) - escTime) > Config.ColorTolerance)
                 {
                     HandleRecursiveCase(leftX, topY, rightX, bottomY);
                     return;
@@ -155,8 +155,8 @@ namespace Mandelbrot.Server.Core
             }
             for (int y = topY + 1; y < bottomY; y += 2)
             {
-                if (Math.Abs(ComputePixelValue(leftX, y) - escTime) > Config.COLOR_TOLERANCE
-                    || Math.Abs(ComputePixelValue(rightX, y) - escTime) > Config.COLOR_TOLERANCE)
+                if (Math.Abs(ComputePixelValue(leftX, y) - escTime) > Config.ColorTolerance
+                    || Math.Abs(ComputePixelValue(rightX, y) - escTime) > Config.ColorTolerance)
                 {
                     HandleRecursiveCase(leftX, topY, rightX, bottomY);
                     return;
