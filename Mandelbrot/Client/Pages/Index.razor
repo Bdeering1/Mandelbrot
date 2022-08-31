@@ -10,8 +10,19 @@
 else
 {
     <div style="height:100%; display: flex; justify-content: center; align-items: center;">
-        <img src=@($"data:image/jpeg;base64,{dto.Image}")/>
+        <img src=@($"data:image/jpeg;base64, {dto.Image}") />
     </div>
+
+    <MudPaper Class="absolute px-12 py-8 ma-5"
+              Style="background: var(--mud-palette-primary);
+                    color: var(--mud-palette-primary-text);
+                    right: 0;
+                    bottom: 0;">
+        <MudText><b>X</b> @($"{dto.PositionX:0.00###}") <b>Y</b> @($"{dto.PositionX:0.00###}")</MudText>
+        <MudText><b>Zoom</b> @($"{dto.Zoom:0.0}")</MudText>
+        @*<MudText><b>Precision</b> @dto.Precision</MudText>
+        <MudText><b>Max Iterations</b> @dto.MaxIterations</MudText>*@
+    </MudPaper>
 }
 
 @code {
