@@ -23,13 +23,17 @@ namespace Mandelbrot.ConsoleApp.Benchmarks
             generator = container.GetService<SetGenerator>();
         }
 
+        [IterationSetup]
+        public void ResetGenerator()
+        {
+            Console.WriteLine("Resetting generator");
+            generator.Reset();
+        }
+
         [Benchmark]
         public async Task GetBitmap()
         {
-            for (int i = 0; i < 100; i++)
-            {
-                await generator.GetBitmap();
-            }
+            await generator.GetBitmap();
         }
     }
 }

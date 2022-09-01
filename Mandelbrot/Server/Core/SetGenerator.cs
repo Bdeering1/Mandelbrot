@@ -72,7 +72,11 @@ namespace Mandelbrot.Server.Core
                     escapeTimes[y * width + x] = default;
                 }
             }
-        }
+            tasksStarted = 0;
+            tasksCompleted = 0;
+            rectsCalculated = 0;
+            pxCalculated = 0;
+    }
 
         private void ComputeSetRecursiveRectangles()
         {
