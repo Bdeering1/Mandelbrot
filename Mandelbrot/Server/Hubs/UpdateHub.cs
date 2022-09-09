@@ -11,7 +11,7 @@ namespace Mandelbrot.Server.Hubs
         {
             _context = context;
         }
-        //this no longer gives an error but also kind of just doesnt sent anything
+        
         public async Task SendImage(ImageDto dto)
         {
             await _context.Clients.All.SendAsync("ReceiveImage", dto);
