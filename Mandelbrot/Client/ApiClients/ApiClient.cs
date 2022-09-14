@@ -1,4 +1,5 @@
-﻿using System.Net.Http.Json;
+﻿using Mandelbrot.Shared.DTOs;
+using System.Net.Http.Json;
 
 namespace Mandelbrot.Client.ApiClients
 {
@@ -14,6 +15,12 @@ namespace Mandelbrot.Client.ApiClients
         public async Task SendImageRequest()
         {
             await http.PostAsJsonAsync("image", "");
+        }
+
+        public async Task<ImageDto> SendImageRequestHttp()
+        {
+            var res = await http.GetFromJsonAsync<ImageDto>("imageHttp");
+            return res;
         }
     }
 }

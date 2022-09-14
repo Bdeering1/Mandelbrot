@@ -25,6 +25,23 @@ public class Controller : ControllerBase
         this.hub = hub;
     }
 
+    [HttpGet]
+    [Route("imageHttp")]
+    public async Task<ImageDto> ImageRequestHttp()
+    {
+        SyncRunningParamters();
+        generator.Reset();
+
+        var s = new Stopwatch();
+        s.Start();
+        var image = Convert.ToBase64String((await generator.GetBitmap()).Encode(SKEncodedImageFormat.Png, 100).ToArray());
+        s.Stop();
+        Console.WriteLine($"{s.ElapsedMilliseconds / 1000.0}s elapsed");
+
+        var dto = new ImageDto(image, (double)Config.Position.r, (double)Config.Position.i, Config.Zoom, Config.Precision, Config.MaxIterations);
+        return dto;
+    }
+
     [HttpPost]
     [Route("image")]
     public async Task ImageRequest()
