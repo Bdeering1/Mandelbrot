@@ -10,7 +10,7 @@
 else
 {
     <div style="height:100%; display: flex; justify-content: center; align-items: center;">
-        <img src=@($"data:image/jpeg;base64, {dto.Image}") />
+        <img src=@imgString />
     </div>
 
     <MudPaper Class="absolute px-12 py-8 ma-5"
@@ -20,12 +20,11 @@ else
                     bottom: 0;">
         <MudText><b>X</b> @($"{dto.PositionX:0.00###}") <b>Y</b> @($"{dto.PositionX:0.00###}")</MudText>
         <MudText><b>Zoom</b> @($"{dto.Zoom:0.0}")</MudText>
-        <MudText>Change position & zoom</MudText>
         <MudTextField @bind-Value="@newZoom" T="int" Label="Zoom" Variant="Variant.Text" />
         <MudTextField @bind-Value="@newPosX" T="double" Label="X Value" Variant="Variant.Text" />
         <MudTextField @bind-Value="@newPosY" T="double" Label="Y Value" Variant="Variant.Text" />
         <MudButton Disabled="@generating" OnClick="regenerateSet" Variant="Variant.Filled" Color="Color.Secondary">
-            @if(generating) {
+            @if(generating == true) {
                 <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true"/>
                 <MudText Class="ms-2">Generating...</MudText>
             } else {
@@ -49,6 +48,8 @@ else
     double newPosY = 0;
     bool generating = false;
 
+    string imgString;
+
     protected override async Task OnInitializedAsync()
     {
         updateClient.OnImageReceived += async (dto) =>
@@ -65,14 +66,17 @@ else
         };
 
         dto = await apiClient.SendImageRequestHttp();
+        imgString = $"data:image/jpeg;base64, {dto.Image}";
     }
 
     async void regenerateSet()
     {
         generating = true;
-        string c = $"{{zoom: {newZoom}, newPosX: {newPosX}, newPosY: {newPosY}";
+        var c = new CameraDto(newZoom, newPosX, newPosY);
         await apiClient.setVars(c);
         dto = await apiClient.SendImageRequestHttp();
+        imgString = $"data:image/jpeg;base64, {dto.Image}";
         generating = false;
+        StateHasChanged();
     }
 }

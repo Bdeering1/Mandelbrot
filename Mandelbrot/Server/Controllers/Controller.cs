@@ -62,10 +62,11 @@ public class Controller : ControllerBase
 
     [HttpPost]
     [Route("setVars")]
-    public Task setVars()
+    public async Task setVars()
     {
-        Console.WriteLine(Request.ToString());
-        return Task.CompletedTask;
+        var dto = await Request.ReadFromJsonAsync<CameraDto>();
+        Config.Zoom = dto.zoom;
+        Config.Position = new BigComplex(dto.posX, dto.posY);
     }
 
     private static void SyncRunningParamters()

@@ -23,10 +23,9 @@ namespace Mandelbrot.Client.ApiClients
             return res;
         }
 
-        public async Task<Task> setVars(string dto)
+        public async Task setVars(CameraDto dto)
         {
             await http.PostAsJsonAsync("setVars", dto);
-            return Task.CompletedTask;
         }
     }
 }
