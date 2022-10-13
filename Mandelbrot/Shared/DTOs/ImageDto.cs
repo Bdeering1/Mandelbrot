@@ -1,7 +1,4 @@
-﻿using System;
-using Mandelbrot.Shared.Models;
-
-namespace Mandelbrot.Shared.DTOs
+﻿namespace Mandelbrot.Shared.DTOs
 {
     public class ImageDto
     {
