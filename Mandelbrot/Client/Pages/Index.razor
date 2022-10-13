@@ -20,6 +20,18 @@ else
                     bottom: 0;">
         <MudText><b>X</b> @($"{dto.PositionX:0.00###}") <b>Y</b> @($"{dto.PositionX:0.00###}")</MudText>
         <MudText><b>Zoom</b> @($"{dto.Zoom:0.0}")</MudText>
+        <MudText>Change position & zoom</MudText>
+        <MudTextField @bind-Value="@newZoom" T="int" Label="Zoom" Variant="Variant.Text" />
+        <MudTextField @bind-Value="@newPosX" T="double" Label="X Value" Variant="Variant.Text" />
+        <MudTextField @bind-Value="@newPosY" T="double" Label="Y Value" Variant="Variant.Text" />
+        <MudButton Disabled="@generating" OnClick="regenerateSet" Variant="Variant.Filled" Color="Color.Secondary">
+            @if(generating) {
+                <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true"/>
+                <MudText Class="ms-2">Generating...</MudText>
+            } else {
+                <MudText>Generate</MudText>
+            }
+        </MudButton>
         @*<MudText><b>Precision</b> @dto.Precision</MudText>
         <MudText><b>Max Iterations</b> @dto.MaxIterations</MudText>*@
     </MudPaper>
@@ -31,6 +43,11 @@ else
 
     private ImageDto dto;
     private bool firstReceived = true;
+
+    int newZoom = 1;
+    double newPosX = 0;
+    double newPosY = 0;
+    bool generating = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -48,5 +65,14 @@ else
         };
 
         dto = await apiClient.SendImageRequestHttp();
+    }
+
+    async void regenerateSet()
+    {
+        generating = true;
+        string c = $"{{zoom: {newZoom}, newPosX: {newPosX}, newPosY: {newPosY}";
+        await apiClient.setVars(c);
+        dto = await apiClient.SendImageRequestHttp();
+        generating = false;
     }
 }

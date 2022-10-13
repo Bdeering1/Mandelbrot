@@ -22,6 +22,12 @@ namespace Mandelbrot.Client.ApiClients
             var res = await http.GetFromJsonAsync<ImageDto>("imageHttp");
             return res;
         }
+
+        public async Task<Task> setVars(string dto)
+        {
+            await http.PostAsJsonAsync("setVars", dto);
+            return Task.CompletedTask;
+        }
     }
 }
 
