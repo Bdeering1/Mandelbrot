@@ -54,9 +54,19 @@ public class Controller : ControllerBase
         var image = Convert.ToBase64String((await generator.GetBitmap()).Encode(SKEncodedImageFormat.Png, 100).ToArray());
         s.Stop();
         Console.WriteLine($"{s.ElapsedMilliseconds / 1000.0}s elapsed");
+        Console.WriteLine(image);
 
         var dto = new ImageDto(image, (double)Config.Position.r, (double)Config.Position.i, Config.Zoom, Config.Precision, Config.MaxIterations);
         await hub.SendImage(dto);
+    }
+
+    [HttpPost]
+    [Route("setVars")]
+    public async Task setVars()
+    {
+        var dto = await Request.ReadFromJsonAsync<CameraDto>();
+        Config.Zoom = dto.zoom;
+        Config.Position = new BigComplex(dto.posX, dto.posY);
     }
 
     private static void SyncRunningParamters()

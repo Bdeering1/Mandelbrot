@@ -22,6 +22,18 @@ else
         <MudText><b>Zoom</b> @($"{dto.Zoom:0.0}")</MudText>
         @*<MudText><b>Precision</b> @dto.Precision</MudText>
         <MudText><b>Max Iterations</b> @dto.MaxIterations</MudText>*@
+
+        <MudTextField @bind-Value="@newZoom" T="int" Label="Zoom" Variant="Variant.Text" />
+        <MudTextField @bind-Value="@newPosX" T="double" Label="X Value" Variant="Variant.Text" />
+        <MudTextField @bind-Value="@newPosY" T="double" Label="Y Value" Variant="Variant.Text" />
+        <MudButton Disabled="@generating" OnClick="regenerateSet" Variant="Variant.Filled" Color="Color.Secondary">
+            @if(generating == true) {
+                <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true"/>
+                <MudText Class="ms-2">Generating...</MudText>
+            } else {
+                <MudText>Generate</MudText>
+            }
+        </MudButton>
     </MudPaper>
 }
 
@@ -31,6 +43,11 @@ else
 
     private ImageDto dto;
     private bool firstReceived = true;
+
+    int newZoom = 1;
+    double newPosX = 0;
+    double newPosY = 0;
+    bool generating = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -48,5 +65,22 @@ else
         };
 
         dto = await apiClient.SendImageRequestHttp();
+    }
+
+    async void regenerateSet()
+    {
+        //start loading animation
+        generating = true;
+
+        //set the config variables
+        var c = new CameraDto(newZoom, newPosX, newPosY);
+        await apiClient.setVars(c); //maybe want to rename this function?
+
+        //request a new image with the new params
+        dto = await apiClient.SendImageRequestHttp();
+
+        //stop loading animation and update the screen
+        generating = false;
+        StateHasChanged();
     }
 }
