@@ -13,6 +13,8 @@ namespace Mandelbrot.Shared.Configuration
 
         public static BigComplex Position { get; set; }
         public static double Zoom { get; set; }
+        public static int domain { get; set; }
+        public static int range { get; set; }
 
         public static int ColorTolerance { get; set; }
         public static int MaxThreads { get; set; }
@@ -36,6 +38,8 @@ namespace Mandelbrot.Shared.Configuration
             MaxIterations = 40;
             Position = BigComplex.Origin;
             Zoom = 1;
+            domain = 4;
+            range = 4;
             ColorTolerance = 5;
             MaxThreads = 7;
             RectOverlap = true;

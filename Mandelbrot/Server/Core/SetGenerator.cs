@@ -12,7 +12,6 @@ namespace Mandelbrot.Server.Core
         private int height { get; } = Config.ImageHeight;
 
         private EscapeTime escapeTime { get; }
-        private Camera camera { get; }
         private uint[] bytes { get; set; }
         private uint[] escapeTimes { get; set; }
 
@@ -22,10 +21,9 @@ namespace Mandelbrot.Server.Core
         private int rectsCalculated = 0;
         private int pxCalculated = 0;
 
-        public SetGenerator(EscapeTime escapeTime, Camera camera)
+        public SetGenerator(EscapeTime escapeTime)
         {
             this.escapeTime = escapeTime;
-            this.camera = camera;
 
             bytes = new uint[width * height];
             escapeTimes = new uint[width * height];
@@ -197,11 +195,11 @@ namespace Mandelbrot.Server.Core
         private void ComputeSetNaively()
         {
             int reflectHeight = height;
-            var shouldReflect = camera.GetComplexY(0) > (BigDecimal)0 && camera.GetComplexY(height) < (BigDecimal)0;
+            var shouldReflect = Camera.GetComplexY(0) > (BigDecimal)0 && Camera.GetComplexY(height) < (BigDecimal)0;
 
             for (int y = 0; y < height; y++)
             {
-                if (shouldReflect && camera.GetComplexY(y) < (BigDecimal)0)
+                if (shouldReflect && Camera.GetComplexY(y) < (BigDecimal)0)
                 {
                     reflectHeight = y - 1;
                     Console.WriteLine($"Reflection point: {reflectHeight}");
@@ -290,7 +288,7 @@ namespace Mandelbrot.Server.Core
             }
 
             pxCalculated++;
-            var complexPos = camera.GetComplexPos(x, y);
+            var complexPos = Camera.GetComplexPos(x, y);
             if (escapeTime.CheckShapes(complexPos))
             {
                 bytes[pixelPos] = 0;
