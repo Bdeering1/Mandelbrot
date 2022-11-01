@@ -27,8 +27,11 @@ public class Controller : ControllerBase
 
     [HttpGet]
     [Route("imageHttp")]
-    public async Task<ImageDto> ImageRequestHttp()
+    public async Task<ImageDto> ImageRequestHttp([FromQuery] double zoom, [FromQuery] double posX, [FromQuery] double posY)
     {
+        Config.Zoom = zoom;
+        Config.Position = new BigComplex(posX, posY);
+
         SyncRunningParamters();
         generator.Reset();
 
@@ -58,15 +61,6 @@ public class Controller : ControllerBase
 
         var dto = new ImageDto(image, (double)Config.Position.r, (double)Config.Position.i, Config.Zoom, Config.Precision, Config.MaxIterations);
         await hub.SendImage(dto);
-    }
-
-    [HttpPost]
-    [Route("setVars")]
-    public async Task setVars()
-    {
-        var dto = await Request.ReadFromJsonAsync<CameraDto>();
-        Config.Zoom = dto.zoom;
-        Config.Position = new BigComplex(dto.posX, dto.posY);
     }
 
     private static void SyncRunningParamters()

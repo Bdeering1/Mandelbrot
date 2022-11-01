@@ -17,15 +17,10 @@ namespace Mandelbrot.Client.ApiClients
             await http.PostAsJsonAsync("image", "");
         }
 
-        public async Task<ImageDto> SendImageRequestHttp()
+        public async Task<ImageDto> SendImageRequestHttp(double zoom, double posX, double posY)
         {
-            var res = await http.GetFromJsonAsync<ImageDto>("imageHttp");
+            var res = await http.GetFromJsonAsync<ImageDto>($"imageHttp?zoom={zoom}&posX={posX}&posY={posY}");
             return res;
-        }
-
-        public async Task setVars(CameraDto dto)
-        {
-            await http.PostAsJsonAsync("setVars", dto);
         }
     }
 }
