@@ -42,8 +42,8 @@ namespace Mandelbrot.Server.Core
 
         public async Task<SKBitmap> GetBitmap()
         {
-            await ComputeSetRecursiveRectanglesParallel();
-            await Task.Yield();
+            ComputeSetRecursiveRectangles();
+            //await Task.Yield();
 
             var imgInfo = new SKImageInfo(width, height, SKColorType.Rgba8888, SKAlphaType.Opaque);
             var bitmap = new SKBitmap(new SKImageInfo(width, height, SKColorType.Rgba8888, SKAlphaType.Opaque));
@@ -124,14 +124,13 @@ namespace Mandelbrot.Server.Core
                 ThreadPool.QueueUserWorkItem(new WaitCallback((object? obj) =>
                 {
                     tasksStarted++;
-                    //Console.WriteLine($"{tasksStarted - tasksCompleted}/{maxTasks} ({tasksCompleted} total)");
-                    ComputeRectangleRecursively(leftX, topY, rightX, bottomY);
+                    ComputeRectangleRecursivelyThread(leftX, topY, rightX, bottomY);
                     tasksCompleted++;
                 }));
             }
             else
             {
-                ComputeRectangleRecursively(leftX, topY, rightX, bottomY);
+                ComputeRectangleRecursivelyThread(leftX, topY, rightX, bottomY);
             }
         }
 
@@ -168,7 +167,40 @@ namespace Mandelbrot.Server.Core
             FillRect(leftX, topY, rightX, bottomY, escTime);
         }
 
-        private void HandleRecursiveCase(int leftX, int topY, int rightX, int bottomY)
+
+        private void ComputeRectangleRecursivelyThread(int leftX, int topY, int rightX, int bottomY)
+        {
+            int w = rightX - leftX;
+            int h = bottomY - topY;
+            if (w <= 5 || h <= 5)
+            {
+                ComputeRect(leftX, topY, rightX, bottomY);
+                return;
+            }
+
+            var escTime = ComputePixelValue(leftX + w/2, topY + h/2);
+            for (int x = leftX; x <= rightX; x += 2)
+            {
+                if (Math.Abs(ComputePixelValue(x, topY) - escTime) > Config.ColorTolerance
+                    || Math.Abs(ComputePixelValue(x, bottomY) - escTime) > Config.ColorTolerance)
+                {
+                    HandleRecursiveCaseThreadOption(leftX, topY, rightX, bottomY);
+                    return;
+                }
+            }
+            for (int y = topY + 1; y < bottomY; y += 2)
+            {
+                if (Math.Abs(ComputePixelValue(leftX, y) - escTime) > Config.ColorTolerance
+                    || Math.Abs(ComputePixelValue(rightX, y) - escTime) > Config.ColorTolerance)
+                {
+                    HandleRecursiveCaseThreadOption(leftX, topY, rightX, bottomY);
+                    return;
+                }
+            }
+
+            FillRect(leftX, topY, rightX, bottomY, escTime);
+        }
+        private void HandleRecursiveCaseThreadOption(int leftX, int topY, int rightX, int bottomY)
         {
             if (Config.RectOverlap)
             {
@@ -191,6 +223,31 @@ namespace Mandelbrot.Server.Core
                 rectsCalculated += 4;
             }
         }
+
+        private void HandleRecursiveCase(int leftX, int topY, int rightX, int bottomY)
+        {
+            if (Config.RectOverlap)
+            {
+                var xDim = (rightX - leftX + 1) / 2;
+                var yDim = (bottomY - topY + 1) / 2;
+                ComputeRectangleRecursively(leftX, topY, leftX + xDim, topY + yDim);
+                ComputeRectangleRecursively(leftX + xDim, topY, rightX, topY + yDim);
+                ComputeRectangleRecursively(leftX, topY + yDim, leftX + xDim, bottomY);
+                ComputeRectangleRecursively(leftX + xDim, topY + yDim, rightX, bottomY);
+                rectsCalculated += 4;
+            }
+            else
+            {
+                var xDim = (rightX - leftX + 1) / 2;
+                var yDim = (bottomY - topY + 1) / 2;
+                ComputeRectangleRecursively(leftX, topY, leftX + xDim - 1, topY + yDim - 1);
+                ComputeRectangleRecursively(leftX + xDim, topY, rightX, topY + yDim - 1);
+                ComputeRectangleRecursively(leftX, topY + yDim, leftX + xDim - 1, bottomY);
+                ComputeRectangleRecursively(leftX + xDim, topY + yDim, rightX, bottomY);
+                rectsCalculated += 4;
+            }
+        }
+
 
         private void ComputeSetNaively()
         {
