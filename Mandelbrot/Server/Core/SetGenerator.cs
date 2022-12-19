@@ -42,8 +42,8 @@ namespace Mandelbrot.Server.Core
 
         public async Task<SKBitmap> GetBitmap()
         {
-            ComputeSetRecursiveRectangles();
-            //await Task.Yield();
+            await ComputeSetRecursiveRectanglesParallel();
+            await Task.Yield();
 
             var imgInfo = new SKImageInfo(width, height, SKColorType.Rgba8888, SKAlphaType.Opaque);
             var bitmap = new SKBitmap(new SKImageInfo(width, height, SKColorType.Rgba8888, SKAlphaType.Opaque));
@@ -359,6 +359,32 @@ namespace Mandelbrot.Server.Core
             escapeTimes[pixelPos] = escTime;
 
             return escTime;
+        }
+
+        private void ApplySmoothing(SKBitmap set, uint passes)
+        {
+            for(int p = 0; p < passes; p++)
+            {
+                for (int i = 0; i < set.Height; i++)
+                {
+                    for (int j = 0; j < set.Width; j++)
+                    {
+                        //make this pixel the average of the 4 surrounding pixels
+                        var pixel = set.GetPixel(j, i);
+                        var left = j == 0 ? pixel : set.GetPixel(j - 1, i);
+                        var right = j == set.Width - 1 ? pixel : set.GetPixel(j + 1, i);
+                        var up = i == 0 ? pixel : set.GetPixel(j, i - 1);
+                        var down = i == set.Height - 1 ? pixel : set.GetPixel(j, i + 1);
+
+                        var avg = new SKColor(
+                            (byte)((pixel.Red + left.Red + right.Red + up.Red + down.Red) / 5),
+                            (byte)((pixel.Green + left.Green + right.Green + up.Green + down.Green) / 5),
+                            (byte)((pixel.Blue + left.Blue + right.Blue + up.Blue + down.Blue) / 5)
+                        );
+                        set.SetPixel(j, i, avg);
+                    }
+                }
+            }
         }
 
         private void DrawGridLines(SKBitmap set)
