@@ -28,16 +28,7 @@ namespace Mandelbrot.Server.Core
             bytes = new uint[width * height];
             escapeTimes = new uint[width * height];
 
-            for (int x = 0; x < width; x++)
-            {
-                for (int y = 0; y < height; y++)
-                {
-                    bytes[y * width + x] = 0xff00ff;
-                }
-            }
-
-            tasksStarted = int.MaxValue;
-            tasksCompleted = 0;
+            Reset();
         }
 
         public async Task<SKBitmap> GetBitmap()
@@ -57,7 +48,6 @@ namespace Mandelbrot.Server.Core
             Console.WriteLine($"{rectsCalculated} rectangles used");
             Console.WriteLine($"{pxCalculated} pixels calculated ({pxCalculated / (double)(width * height) * 100:0.##}%)");
 
-
             return bitmap;
         }
 
@@ -68,6 +58,7 @@ namespace Mandelbrot.Server.Core
                 for (int x = 0; x < width; x++)
                 {
                     escapeTimes[y * width + x] = default;
+                    bytes[y * width + x] = 0xff00ff;
                 }
             }
             tasksStarted = 0;
@@ -114,24 +105,21 @@ namespace Mandelbrot.Server.Core
                 }
             }
             await Task.Yield();
+            while (tasksStarted > tasksCompleted)
+            {
+                Thread.Sleep(5);
+            }
             Console.WriteLine($"Max threads: {Config.MaxThreads} Threads completed: {tasksCompleted}");
         }
 
         private void ComputeRectangleRecursivelyThreadOption(int leftX, int topY, int rightX, int bottomY)
         {
-            if (tasksStarted - tasksCompleted < Config.MaxThreads)
-            {
-                ThreadPool.QueueUserWorkItem(new WaitCallback((object? obj) =>
-                {
-                    tasksStarted++;
-                    ComputeRectangleRecursivelyThread(leftX, topY, rightX, bottomY);
-                    tasksCompleted++;
-                }));
-            }
-            else
+            tasksStarted++;
+            ThreadPool.QueueUserWorkItem(new WaitCallback((object? obj) =>
             {
                 ComputeRectangleRecursivelyThread(leftX, topY, rightX, bottomY);
-            }
+                tasksCompleted++;
+            }));
         }
 
         private void ComputeRectangleRecursively(int leftX, int topY, int rightX, int bottomY)
