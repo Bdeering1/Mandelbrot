@@ -3,6 +3,8 @@ using System.Runtime.InteropServices;
 using Mandelbrot.Shared.Configuration;
 using Mandelbrot.Shared.Models;
 using SkiaSharp;
+using ILGPU;
+using ILGPU.Runtime;
 
 namespace Mandelbrot.Server.Core
 {
@@ -21,6 +23,13 @@ namespace Mandelbrot.Server.Core
         private int rectsCalculated = 0;
         private int pxCalculated = 0;
 
+        // Variables for running on GPU
+        private static Context context;
+        private static Accelerator accelerator;
+        //this currently needs to use decimals instead of BigComplex's, because all types passed to the GPU must be non-nullable
+        //could use a struct for this instead
+        private static Action<Index1D, int, int, double, double, double, int, int, uint, ArrayView<uint>> generator_kernel;
+
         public SetGenerator(EscapeTime escapeTime)
         {
             this.escapeTime = escapeTime;
@@ -35,6 +44,18 @@ namespace Mandelbrot.Server.Core
         {
             await ComputeParallel();
             await Task.Yield();
+
+            //CompileKernel();
+            //escapeTimes = CalcGPU(width, height);
+            //Dispose();
+
+            for (int i = 0; i < width*height; i++)
+            {
+                var escTime = escapeTimes[i];
+                //if (i % 11 == 0) Console.WriteLine(escTime);
+                var c = Config.Colors[(int)escTime - 1];
+                bytes[i] = (uint)((c.A << 24) | (c.B << 16) | (c.G << 8) | (c.R << 0));
+            }
 
             var imgInfo = new SKImageInfo(width, height, SKColorType.Rgba8888, SKAlphaType.Opaque);
             var bitmap = new SKBitmap(new SKImageInfo(width, height, SKColorType.Rgba8888, SKAlphaType.Opaque));
@@ -313,6 +334,65 @@ namespace Mandelbrot.Server.Core
             escapeTimes[pixelPos] = escTime;
 
             return escTime;
+        }
+
+        private static uint[] CalcGPU(int width, int height)
+        {
+            Console.WriteLine("started generating on GPU");
+
+            MemoryBuffer1D<uint, Stride1D.Dense> GPU_out = accelerator.Allocate1D<uint>(width * height);
+            Console.WriteLine("about to generate on GPU");
+            generator_kernel((int)GPU_out.Length, Config.domain, Config.range, Config.Zoom, (double)Config.Position.r, (double)Config.Position.i, width, height, Config.MaxIterations, GPU_out.View);
+            Console.WriteLine("waiting for accelerator to synchronize...");
+            accelerator.Synchronize();
+
+            Console.WriteLine("finished generating on GPU");
+
+            uint[] bytesOut = GPU_out.GetAsArray1D();
+            return bytesOut;
+        }
+
+        private static void GeneratorKernel(Index1D index, int domain, int range, double zoom, double posI, double posR, int width, int height, uint max_iterations, ArrayView<uint> output)
+        {
+            int x = index % width;
+            int y = index / height;
+            double constR = x * domain / (width * zoom) - (domain / (2 * zoom)) + posR;
+            double constI = -y * range / (height * zoom) + (range / (2 * zoom)) + posI;
+
+            double curR = 0;
+            double curI = 0;
+
+            double rSquared = 0;
+            double iSquared = 0;
+
+            uint iter = 0;
+            while (rSquared + iSquared <= 4 && iter < max_iterations)
+            {
+                double tempR = rSquared - iSquared + constR;
+                curI = 2 * curR * curI + constI;
+                curR = tempR;
+
+                rSquared = curR * curR;
+                iSquared = curI * curI;
+                iter++;
+            }
+            output[index] = iter;
+        }
+        
+        private static void CompileKernel()
+        {
+            context = Context.CreateDefault();
+            //try to create accelerator on GPU, otherwise this will default to the cpu (i.e if no GPU or something)
+            accelerator = context.GetPreferredDevice(false).CreateAccelerator(context);
+
+            generator_kernel = accelerator.LoadAutoGroupedStreamKernel<Index1D, int, int, double, double, double, int, int, uint, ArrayView<uint>>(GeneratorKernel);
+        }
+
+        //disposes all GPU objects
+        private static void Dispose()
+        {
+            accelerator.Dispose();
+            context.Dispose();
         }
 
         private void ApplySmoothing(SKBitmap set, uint passes)
