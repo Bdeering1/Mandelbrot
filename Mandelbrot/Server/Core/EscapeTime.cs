@@ -21,7 +21,7 @@ namespace Mandelbrot.Server.Core
             uint iter = 0;
             while (rSquared + iSquared <= new BigDecimal(4) && iter < Config.MaxIterations)
             {
-                current = new BigComplex(rSquared - iSquared, current.r * current.i + current.i * current.r) + constant;
+                current = new BigComplex(rSquared - iSquared, (BigDecimal)2 * current.r * current.i) + constant;
                 rSquared = current.r * current.r;
                 iSquared = current.i * current.i;
                 iter++;
