@@ -8,7 +8,7 @@ using ILGPU.Runtime;
 
 namespace Mandelbrot.Server.Core
 {
-    public class SetGenerator
+    public class SetGenerator : IDisposable
     {
         private int width { get; } = Config.ImageWidth;
         private int height { get; } = Config.ImageHeight;
@@ -24,11 +24,35 @@ namespace Mandelbrot.Server.Core
         private int pxCalculated = 0;
 
         // Variables for running on GPU
+        private bool useCPU = false;
         private static Context context;
-        private static Accelerator accelerator;
-        //this currently needs to use decimals instead of BigComplex's, because all types passed to the GPU must be non-nullable
-        //could use a struct for this instead
-        private static Action<Index1D, int, int, double, double, double, int, int, uint, ArrayView<uint>> generator_kernel;
+        private static Accelerator? accelerator;
+        struct GPUParams
+        {
+            public int domain;
+            public int range;
+            public int width;
+            public int height;
+            public double zoom;
+            public double posR;
+            public double posI;
+            public uint maxIterations;
+            public ArrayView<uint> output;
+
+            public GPUParams(int domain, int range, int width, int height, double zoom, double posR, double posI, uint maxIterations, ArrayView<uint> output)
+            {
+                this.domain = domain;
+                this.range = range;
+                this.width = width;
+                this.height = height;
+                this.zoom = zoom;
+                this.posR = posR;
+                this.posI = posI;
+                this.maxIterations = maxIterations;
+                this.output = output;
+            }
+        }
+        private static Action<Index1D, GPUParams> generatorKernel;
 
         public SetGenerator(EscapeTime escapeTime)
         {
@@ -37,22 +61,30 @@ namespace Mandelbrot.Server.Core
             bytes = new uint[width * height];
             escapeTimes = new uint[width * height];
 
+            context = Context.CreateDefault();
+            var preferredDevice = context.GetPreferredDevice(false);
+            if (preferredDevice.AcceleratorType == AcceleratorType.CPU) {
+                useCPU = true;
+            } else {
+                accelerator = preferredDevice.CreateAccelerator(context);
+                generatorKernel = accelerator.LoadAutoGroupedStreamKernel<Index1D, GPUParams>(GeneratorKernel);
+            }
+
             Reset();
         }
 
         public async Task<SKBitmap> GetBitmap()
         {
-            await ComputeParallel();
+            if (useCPU) {
+                await ComputeParallel();
+            } else {
+                escapeTimes = CalcGPU(width, height);
+            }
             await Task.Yield();
-
-            //CompileKernel();
-            //escapeTimes = CalcGPU(width, height);
-            //Dispose();
 
             for (int i = 0; i < width*height; i++)
             {
                 var escTime = escapeTimes[i];
-                //if (i % 11 == 0) Console.WriteLine(escTime);
                 var c = Config.Colors[(int)escTime - 1];
                 bytes[i] = (uint)((c.A << 24) | (c.B << 16) | (c.G << 8) | (c.R << 0));
             }
@@ -64,7 +96,7 @@ namespace Mandelbrot.Server.Core
             var gcHandle = GCHandle.Alloc(bytes, GCHandleType.Pinned); //makes sure the byte array doesnt get moved in memory, so that the pointer can be used
             bitmap.InstallPixels(imgInfo, gcHandle.AddrOfPinnedObject(), imgInfo.RowBytes, delegate { gcHandle.Free(); }, null);
 
-            //DrawGridLines(bitmap);
+            //DrawGrid(bitmap);
             Console.WriteLine($"{pxCalculated} pixels calculated ({pxCalculated / (double)(width * height) * 100:0.##}%)");
 
             return bitmap;
@@ -339,25 +371,34 @@ namespace Mandelbrot.Server.Core
         private static uint[] CalcGPU(int width, int height)
         {
             Console.WriteLine("started generating on GPU");
-
             MemoryBuffer1D<uint, Stride1D.Dense> GPU_out = accelerator.Allocate1D<uint>(width * height);
-            Console.WriteLine("about to generate on GPU");
-            generator_kernel((int)GPU_out.Length, Config.domain, Config.range, Config.Zoom, (double)Config.Position.r, (double)Config.Position.i, width, height, Config.MaxIterations, GPU_out.View);
+            var gp = new GPUParams(
+                Config.domain,
+                Config.range,
+                width,
+                height,
+                Config.Zoom,
+                (double)Config.Position.r,
+                (double)Config.Position.i,
+                Config.MaxIterations,
+                GPU_out.View
+            );
+            generatorKernel((int)GPU_out.Length, gp);
+
             Console.WriteLine("waiting for accelerator to synchronize...");
             accelerator.Synchronize();
 
             Console.WriteLine("finished generating on GPU");
-
             uint[] bytesOut = GPU_out.GetAsArray1D();
             return bytesOut;
         }
 
-        private static void GeneratorKernel(Index1D index, int domain, int range, double zoom, double posI, double posR, int width, int height, uint max_iterations, ArrayView<uint> output)
+        private static void GeneratorKernel(Index1D index, GPUParams gp)
         {
-            int x = index % width;
-            int y = index / height;
-            double constR = x * domain / (width * zoom) - (domain / (2 * zoom)) + posR;
-            double constI = -y * range / (height * zoom) + (range / (2 * zoom)) + posI;
+            int x = index % gp.width;
+            int y = index / gp.height;
+            double constR = x * gp.domain / (gp.width * gp.zoom) - (gp.domain / (2 * gp.zoom)) + gp.posR;
+            double constI = -y * gp.range / (gp.height * gp.zoom) + (gp.range / (2 * gp.zoom)) + gp.posI;
 
             double curR = 0;
             double curI = 0;
@@ -366,7 +407,7 @@ namespace Mandelbrot.Server.Core
             double iSquared = 0;
 
             uint iter = 0;
-            while (rSquared + iSquared <= 4 && iter < max_iterations)
+            while (rSquared + iSquared <= 4 && iter < gp.maxIterations)
             {
                 double tempR = rSquared - iSquared + constR;
                 curI = 2 * curR * curI + constI;
@@ -376,22 +417,12 @@ namespace Mandelbrot.Server.Core
                 iSquared = curI * curI;
                 iter++;
             }
-            output[index] = iter;
-        }
-        
-        private static void CompileKernel()
-        {
-            context = Context.CreateDefault();
-            //try to create accelerator on GPU, otherwise this will default to the cpu (i.e if no GPU or something)
-            accelerator = context.GetPreferredDevice(false).CreateAccelerator(context);
-
-            generator_kernel = accelerator.LoadAutoGroupedStreamKernel<Index1D, int, int, double, double, double, int, int, uint, ArrayView<uint>>(GeneratorKernel);
+            gp.output[index] = iter;
         }
 
-        //disposes all GPU objects
-        private static void Dispose()
+        public void Dispose()
         {
-            accelerator.Dispose();
+            accelerator?.Dispose();
             context.Dispose();
         }
 
@@ -421,7 +452,7 @@ namespace Mandelbrot.Server.Core
             }
         }
 
-        private void DrawGridLines(SKBitmap set)
+        private void DrawGrid(SKBitmap set)
         {   
             using var bitmapCanvas = new SKCanvas(set);
             var paint = new SKPaint {
