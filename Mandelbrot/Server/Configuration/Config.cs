@@ -11,10 +11,9 @@ namespace Mandelbrot.Shared.Configuration
         public static int Precision { get; set; }
         public static uint MaxIterations { get; set; }
 
-        public static BigComplex Position { get; set; }
         public static double Zoom { get; set; }
-        public static int domain { get; set; }
-        public static int range { get; set; }
+        public static int Domain { get; set; }
+        public static int Range { get; set; }
 
         public static int ColorTolerance { get; set; }
         public static int MaxThreads { get; set; }
@@ -36,10 +35,9 @@ namespace Mandelbrot.Shared.Configuration
             ImageHeight = 750;
             Precision = 20;
             MaxIterations = 40;
-            Position = BigComplex.Origin;
             Zoom = 1;
-            domain = 4;
-            range = 4;
+            Domain = 4;
+            Range = 4;
             ColorTolerance = 5;
             MaxThreads = 7;
             RectOverlap = true;
@@ -54,7 +52,6 @@ namespace Mandelbrot.Shared.Configuration
             ImageHeight = 100;
             Precision = precision;
             MaxIterations = maxIterations;
-            Position = BigComplex.Origin;
             Zoom = 1;
             ColorTolerance = 0;
             MaxThreads = 7;

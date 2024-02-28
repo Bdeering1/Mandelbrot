@@ -14,15 +14,17 @@ namespace Mandelbrot.Server.Controllers;
 public class Controller : ControllerBase
 {
 
-    private SetGenerator generator { get; }
-    private UpdateHub hub { get; }
-    private ILogger<Controller> logger { get; }
+    private SetGenerator Generator { get; }
+    private Camera Camera { get; }
+    private UpdateHub Hub { get; }
+    private ILogger<Controller> Logger { get; }
 
-    public Controller(SetGenerator generator, UpdateHub hub, ILogger<Controller> logger)
+    public Controller(SetGenerator generator, Camera camera, UpdateHub hub, ILogger<Controller> logger)
     {
-        this.logger = logger;
-        this.generator = generator;
-        this.hub = hub;
+        Generator = generator;
+        Camera = camera;
+        Hub = hub;
+        Logger = logger;
     }
 
     [HttpGet]
@@ -30,18 +32,18 @@ public class Controller : ControllerBase
     public async Task<ImageDto> ImageRequestHttp([FromQuery] double zoom, [FromQuery] double posX, [FromQuery] double posY)
     {
         Config.Zoom = zoom;
-        Config.Position = new BigComplex(posX, posY);
+        Camera.Position = new BigComplex(posX, posY);
 
         SyncRunningParamters();
-        generator.Reset();
+        Generator.Reset();
 
         var s = new Stopwatch();
         s.Start();
-        var image = Convert.ToBase64String((await generator.GetBitmap()).Encode(SKEncodedImageFormat.Png, 100).ToArray());
+        var image = Convert.ToBase64String((await Generator.GetBitmap()).Encode(SKEncodedImageFormat.Png, 100).ToArray());
         s.Stop();
         Console.WriteLine($"{s.ElapsedMilliseconds / 1000.0}s elapsed");
 
-        var dto = new ImageDto(image, (double)Config.Position.r, (double)Config.Position.i, Config.Zoom, Config.Precision, Config.MaxIterations);
+        var dto = new ImageDto(image, (double)Camera.Position.r, (double)Camera.Position.i, Config.Zoom, Config.Precision, Config.MaxIterations);
         return dto;
     }
 
@@ -50,17 +52,17 @@ public class Controller : ControllerBase
     public async Task ImageRequest()
     {
         SyncRunningParamters();
-        generator.Reset();
+        Generator.Reset();
 
         var s = new Stopwatch();
         s.Start();
-        var image = Convert.ToBase64String((await generator.GetBitmap()).Encode(SKEncodedImageFormat.Png, 100).ToArray());
+        var image = Convert.ToBase64String((await Generator.GetBitmap()).Encode(SKEncodedImageFormat.Png, 100).ToArray());
         s.Stop();
         Console.WriteLine($"{s.ElapsedMilliseconds / 1000.0}s elapsed");
         Console.WriteLine(image);
 
-        var dto = new ImageDto(image, (double)Config.Position.r, (double)Config.Position.i, Config.Zoom, Config.Precision, Config.MaxIterations);
-        await hub.SendImage(dto);
+        var dto = new ImageDto(image, (double)Camera.Position.r, (double)Camera.Position.i, Config.Zoom, Config.Precision, Config.MaxIterations);
+        await Hub.SendImage(dto);
     }
 
     private static void SyncRunningParamters()

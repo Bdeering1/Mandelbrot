@@ -5,6 +5,7 @@ using Mandelbrot.Shared.Models;
 using SkiaSharp;
 using ILGPU;
 using ILGPU.Runtime;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Mandelbrot.Server.Core
 {
@@ -14,6 +15,7 @@ namespace Mandelbrot.Server.Core
         private int height { get; } = Config.ImageHeight;
 
         private EscapeTime escapeTime { get; }
+        private Camera Camera { get; }
         private uint[] bytes { get; set; }
         private uint[] escapeTimes { get; set; }
 
@@ -24,8 +26,8 @@ namespace Mandelbrot.Server.Core
         private int pxCalculated = 0;
 
         // Variables for running on GPU
-        private bool useCPU = false;
-        private static Context context;
+        private readonly bool useCPU = false;
+        private static Context? context;
         private static Accelerator? accelerator;
         struct GPUParams
         {
@@ -52,11 +54,12 @@ namespace Mandelbrot.Server.Core
                 this.output = output;
             }
         }
-        private static Action<Index1D, GPUParams> generatorKernel;
+        private static Action<Index1D, GPUParams>? generatorKernel;
 
-        public SetGenerator(EscapeTime escapeTime)
+        public SetGenerator(EscapeTime escapeTime, Camera camera)
         {
             this.escapeTime = escapeTime;
+            this.Camera = camera;
 
             bytes = new uint[width * height];
             escapeTimes = new uint[width * height];
@@ -82,7 +85,7 @@ namespace Mandelbrot.Server.Core
             }
             await Task.Yield();
 
-            for (int i = 0; i < width*height; i++)
+            for (int i = 0; i < width * height; i++)
             {
                 var escTime = escapeTimes[i];
                 var c = Config.Colors[(int)escTime - 1];
@@ -146,7 +149,7 @@ namespace Mandelbrot.Server.Core
                 return;
             }
 
-            var escTime = ComputePixelValue(leftX + w/2, topY + h/2);
+            var escTime = ComputePixelValue(leftX + w / 2, topY + h / 2);
             for (int x = leftX; x <= rightX; x += 2)
             {
                 if (Math.Abs(ComputePixelValue(x, topY) - escTime) > Config.ColorTolerance
@@ -241,7 +244,7 @@ namespace Mandelbrot.Server.Core
                 return;
             }
 
-            var escTime = ComputePixelValue(leftX + w/2, topY + h/2);
+            var escTime = ComputePixelValue(leftX + w / 2, topY + h / 2);
             for (int x = leftX; x <= rightX; x += 2)
             {
                 if (Math.Abs(ComputePixelValue(x, topY) - escTime) > Config.ColorTolerance
@@ -312,9 +315,9 @@ namespace Mandelbrot.Server.Core
             var c = Config.Colors[(int)escTime - 1];
             uint col = (uint)((c.A << 24) | (c.B << 16) | (c.G << 8) | (c.R << 0));
 
-            for(int x = leftX; x <= rightX; x++)
+            for (int x = leftX; x <= rightX; x++)
             {
-                for(int y = topY; y <= bottomY; y++)
+                for (int y = topY; y <= bottomY; y++)
                 {
                     if (Config.ShowRects && (x == leftX || x == rightX || y == topY || y == bottomY))
                     {
@@ -370,16 +373,18 @@ namespace Mandelbrot.Server.Core
 
         private static uint[] CalcGPU(int width, int height)
         {
+            if (accelerator == null || generatorKernel == null) { return Array.Empty<uint>(); }
+
             Console.WriteLine("started generating on GPU");
             MemoryBuffer1D<uint, Stride1D.Dense> GPU_out = accelerator.Allocate1D<uint>(width * height);
             var gp = new GPUParams(
-                Config.domain,
-                Config.range,
+                Config.Domain,
+                Config.Range,
                 width,
                 height,
                 Config.Zoom,
-                (double)Config.Position.r,
-                (double)Config.Position.i,
+                (double)Camera.Position.r,
+                (double)Camera.Position.i,
                 Config.MaxIterations,
                 GPU_out.View
             );
@@ -423,7 +428,7 @@ namespace Mandelbrot.Server.Core
         public void Dispose()
         {
             accelerator?.Dispose();
-            context.Dispose();
+            context?.Dispose();
         }
 
         private void ApplySmoothing(SKBitmap set, uint passes)

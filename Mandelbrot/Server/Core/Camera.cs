@@ -5,24 +5,30 @@ namespace Mandelbrot.Server.Core
 {
     public class Camera
     {
+        public static BigComplex Position { get; set; }
 
-        public static BigComplex GetComplexPos(int x, int y)
+        public Camera()
+        {
+            Position = BigComplex.Origin;
+        }
+
+        public BigComplex GetComplexPos(int x, int y)
         {
             BigComplex complexPos = PxToCoord(x, y);
-            complexPos += Config.Position;
+            complexPos += Position;
             return complexPos;
         }
 
-        public static BigDecimal GetComplexY(int y)
+        public BigDecimal GetComplexY(int y)
         {
-            var newY = (BigDecimal)(((-y * Config.range) / (Config.ImageHeight * Config.Zoom)) + (Config.range / (2 * Config.Zoom)));
-            return newY + Config.Position.i;
+            var newY = (BigDecimal)(((-y * Config.Range) / (Config.ImageHeight * Config.Zoom)) + (Config.Range / (2 * Config.Zoom)));
+            return newY + Position.i;
         }
 
-        private static BigComplex PxToCoord(int x, int y)
+        private BigComplex PxToCoord(int x, int y)
         {
-            var newX = (BigDecimal)(((x * Config.domain) / (Config.ImageWidth * Config.Zoom)) - (Config.domain / (2 * Config.Zoom)));
-            var newY = (BigDecimal)(((-y * Config.range) / (Config.ImageHeight * Config.Zoom)) + (Config.range / (2 * Config.Zoom)));
+            var newX = (BigDecimal)(((x * Config.Domain) / (Config.ImageWidth * Config.Zoom)) - (Config.Domain / (2 * Config.Zoom)));
+            var newY = (BigDecimal)(((-y * Config.Range) / (Config.ImageHeight * Config.Zoom)) + (Config.Range / (2 * Config.Zoom)));
 
             return new(newX, newY);
         }
