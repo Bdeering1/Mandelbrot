@@ -19,12 +19,6 @@ namespace Mandelbrot.Server.Core
             return complexPos;
         }
 
-        public BigDecimal GetComplexY(int y)
-        {
-            var newY = (BigDecimal)(((-y * Config.Range) / (Config.ImageHeight * Config.Zoom)) + (Config.Range / (2 * Config.Zoom)));
-            return newY + Position.i;
-        }
-
         private BigComplex PxToCoord(int x, int y)
         {
             var newX = (BigDecimal)(((x * Config.Domain) / (Config.ImageWidth * Config.Zoom)) - (Config.Domain / (2 * Config.Zoom)));

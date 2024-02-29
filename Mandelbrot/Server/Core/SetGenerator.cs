@@ -383,8 +383,8 @@ namespace Mandelbrot.Server.Core
                 width,
                 height,
                 Config.Zoom,
-                (double)Camera.Position.r,
-                (double)Camera.Position.i,
+                (double)Camera.Position.R,
+                (double)Camera.Position.I,
                 Config.MaxIterations,
                 GPU_out.View
             );

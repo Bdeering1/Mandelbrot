@@ -43,7 +43,7 @@ public class Controller : ControllerBase
         s.Stop();
         Console.WriteLine($"{s.ElapsedMilliseconds / 1000.0}s elapsed");
 
-        var dto = new ImageDto(image, (double)Camera.Position.r, (double)Camera.Position.i, Config.Zoom, Config.Precision, Config.MaxIterations);
+        var dto = new ImageDto(image, (double)Camera.Position.R, (double)Camera.Position.I, Config.Zoom, Config.Precision, Config.MaxIterations);
         return dto;
     }
 
@@ -61,7 +61,7 @@ public class Controller : ControllerBase
         Console.WriteLine($"{s.ElapsedMilliseconds / 1000.0}s elapsed");
         Console.WriteLine(image);
 
-        var dto = new ImageDto(image, (double)Camera.Position.r, (double)Camera.Position.i, Config.Zoom, Config.Precision, Config.MaxIterations);
+        var dto = new ImageDto(image, (double)Camera.Position.R, (double)Camera.Position.I, Config.Zoom, Config.Precision, Config.MaxIterations);
         await Hub.SendImage(dto);
     }
 

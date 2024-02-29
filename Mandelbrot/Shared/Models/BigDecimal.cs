@@ -7,7 +7,7 @@ namespace Mandelbrot.Shared.Models
     /// Arbitrary precision decimal<br/>
     /// Based on https://gist.github.com/JcBernack/0b4eef59ca97ee931a2f45542b9ff06d
     /// </summary>
-    public class BigDecimal
+    public struct BigDecimal
     {
         public static int Precision { get; set; } = 25;
 

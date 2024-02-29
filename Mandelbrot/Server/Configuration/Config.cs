@@ -1,6 +1,5 @@
 ﻿using System.Drawing;
 using Mandelbrot.Core;
-using Mandelbrot.Shared.Models;
 
 namespace Mandelbrot.Shared.Configuration
 {
@@ -16,18 +15,13 @@ namespace Mandelbrot.Shared.Configuration
         public static int Range { get; set; }
 
         public static int ColorTolerance { get; set; }
-        public static int MaxThreads { get; set; }
-
         public static bool RectOverlap { get; set; }
         public static int InitialDivisions { get; set; }
         public static bool ShowRects { get; set; }
 
         public static List<Color> Colors { get; set; }
 
-        static Config()
-        {
-            ApplyDefaultConfig();
-        }
+        static Config() => ApplyDefaultConfig();
 
         public static void ApplyDefaultConfig()
         {
@@ -39,7 +33,6 @@ namespace Mandelbrot.Shared.Configuration
             Domain = 4;
             Range = 4;
             ColorTolerance = 5;
-            MaxThreads = 7;
             RectOverlap = true;
             InitialDivisions = 20;
             ShowRects = false;
@@ -54,7 +47,6 @@ namespace Mandelbrot.Shared.Configuration
             MaxIterations = maxIterations;
             Zoom = 1;
             ColorTolerance = 0;
-            MaxThreads = 7;
             RectOverlap = true;
             InitialDivisions = 20;
             ShowRects = false;

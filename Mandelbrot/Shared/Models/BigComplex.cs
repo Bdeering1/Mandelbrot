@@ -1,37 +1,37 @@
 ﻿namespace Mandelbrot.Shared.Models
 {
-    public class BigComplex
+    public struct BigComplex
     {
-        public BigDecimal r { get; private set; }
-        public BigDecimal i { get; private set; }
+        public BigDecimal R { get; private set; }
+        public BigDecimal I { get; private set; }
 
 
         public BigComplex(BigDecimal real, BigDecimal imaginary)
         {
-            r = real;
-            i = imaginary;
+            R = real;
+            I = imaginary;
         }
         public BigComplex(double real, double imaginary)
         {
-            r = (BigDecimal)real;
-            i = (BigDecimal)imaginary;
+            R = (BigDecimal)real;
+            I = (BigDecimal)imaginary;
         }
 
         public static readonly BigComplex Origin = new(0, 0);
 
         public static BigComplex operator +(BigComplex a, BigComplex b) =>
-            new BigComplex(a.r + b.r, a.i + b.i);
+            new BigComplex(a.R + b.R, a.I + b.I);
 
         public static BigComplex operator -(BigComplex a, BigComplex b) =>
-            new BigComplex(a.r - b.r, a.i - b.i);
+            new BigComplex(a.R - b.R, a.I - b.I);
 
         public static BigComplex operator *(BigComplex a, BigComplex b) =>
-            new BigComplex(a.r * b.r - a.i * b.i,
-                        a.r * b.i + a.i * b.r);
+            new BigComplex(a.R * b.R - a.I * b.I,
+                        a.R * b.I + a.I * b.R);
 
 
-        public override string ToString() => $"{r.Truncate()} + {i.Truncate()}i";
+        public override string ToString() => $"{R.Truncate()} + {I.Truncate()}i";
 
-        public string ToLongString() => $"{r} + {i}i";
+        public string ToLongString() => $"{R} + {I}i";
     }
 }
